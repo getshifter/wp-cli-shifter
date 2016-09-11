@@ -14,9 +14,11 @@ Feature: Test that `wp shifter` commands loads.
       """
       Success: Archived to 'archive.zip'
       """
+    And the archive.zip file should exist
 
     When I run `wp shifter archive hello.zip`
     Then STDOUT should contain:
       """
       Success: Archived to 'hello.zip'
       """
+    And the hello.zip file should exist
