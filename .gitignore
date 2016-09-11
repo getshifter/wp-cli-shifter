@@ -1,0 +1,5 @@
+behat.phar
+composer.phar
+/vendor
+.DS_Store
+installer

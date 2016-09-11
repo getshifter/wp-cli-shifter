@@ -1,0 +1,8 @@
+{
+  "name": "wp-cli-shifter",
+  "scripts": {
+    "setup": "WP_CLI_BIN_DIR=/tmp/wp-cli-phar bash bin/install-package-tests.sh",
+    "test": "WP_CLI_BIN_DIR=/tmp/wp-cli-phar ./vendor/bin/behat"
+  },
+  "license": "GPLv2"
+}
