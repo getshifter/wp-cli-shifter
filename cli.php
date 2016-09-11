@@ -17,6 +17,17 @@ class WP_CLI_Shifter extends WP_CLI_Command
 	/**
 	 * Create a .zip archive for the Shifter.
 	 *
+	 * ## OPTIONS
+	 * [<file>]
+	 * The name of the .zip file to archive. If omitted, it will be 'archive.zip'.
+	 *
+	 * ## EXAMPLES
+	 * $ wp shifter archive
+	 * Success: Archived to 'archive.zip'.
+	 *
+	 * $ wp shifter archive /path/to/hello.zip
+	 * Success: Archived to '/path/to/hello.zip'.
+	 *
 	 * @subcommand archive
 	 */
 	function archive( $args ) {
