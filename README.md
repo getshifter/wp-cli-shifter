@@ -1,5 +1,7 @@
 # wp shifter
 
+[![Build Status](https://travis-ci.org/megumiteam/wp-cli-shifter.svg?branch=master)](https://travis-ci.org/megumiteam/wp-cli-shifter)
+
 ## Requires
 
 * WP-CLI 0.23 or later
