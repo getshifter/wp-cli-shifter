@@ -1,6 +1,29 @@
 <?php
+/**
+ * Remove a directory recursively.
+ *
+ * @param string $dir Path to the directory you want to remove.
+ */
+function rrmdir( $dir ) {
+	$files = new RecursiveIteratorIterator(
+		new RecursiveDirectoryIterator( $dir, RecursiveDirectoryIterator::SKIP_DOTS ),
+		RecursiveIteratorIterator::CHILD_FIRST
+	);
 
-function tempdir( $dir = false, $prefix = '' ) {
+	foreach ( $files as $fileinfo ) {
+		$todo = ( $fileinfo->isDir() ? 'rmdir' : 'unlink' );
+		$todo( $fileinfo->getRealPath() );
+	}
+
+	rmdir($dir);
+}
+
+/**
+ * Create a temporary working directory
+ *
+ * @param string $prefix Prefix for the temporary directory you want to create.
+ */
+function tempdir( $prefix = '' ) {
 	$tempfile = tempnam( sys_get_temp_dir(), $prefix );
 	if ( file_exists( $tempfile ) ) {
 		unlink( $tempfile );
@@ -13,6 +36,9 @@ function tempdir( $dir = false, $prefix = '' ) {
 
 /**
  * Copy directory recursively.
+ *
+ * @param string $source Path to the source directory.
+ * @param string $dest   Path to the destination.
  */
 function rcopy( $source, $dest ) {
 	mkdir( $dest, 0755 );
@@ -31,6 +57,9 @@ function rcopy( $source, $dest ) {
 
 /**
  * Create a zip archive from $source to $destination.
+ *
+ * @param string $source Path to the source directory.
+ * @param string $dest   Path to the .zip file.
  */
 function zip( $source, $destination ) {
 	if ( ! extension_loaded( 'zip' ) || ! file_exists( $source ) ) {

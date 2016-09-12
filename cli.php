@@ -15,23 +15,23 @@ require_once( dirname( __FILE__ ) . "/lib/functions.php" );
 class WP_CLI_Shifter extends WP_CLI_Command
 {
 	/**
-	 * Create a .zip archive for the Shifter.
+	 * Create a .zip archive as a backup for the Shifter.
 	 *
 	 * ## OPTIONS
 	 * [<file>]
 	 * The name of the .zip file to archive. If omitted, it will be 'archive.zip'.
 	 *
 	 * ## EXAMPLES
-	 * $ wp shifter archive
-	 * Success: Archived to 'archive.zip'.
+	 * $ wp shifter backup
+	 * Success: Backuped to 'archive.zip'.
 	 *
-	 * $ wp shifter archive /path/to/hello.zip
-	 * Success: Archived to '/path/to/hello.zip'.
+	 * $ wp shifter backup /path/to/hello.zip
+	 * Success: Backuped to '/path/to/hello.zip'.
 	 *
-	 * @subcommand archive
+	 * @subcommand backup
 	 */
-	function archive( $args ) {
-		$tmp_dir = tempdir( sys_get_temp_dir(), 'sft' );
+	function backup( $args ) {
+		$tmp_dir = tempdir( 'sft' );
 		rcopy( ABSPATH, $tmp_dir . '/webroot' );
 		WP_CLI::launch_self(
 			"db export",
@@ -49,8 +49,9 @@ class WP_CLI_Shifter extends WP_CLI_Command
 		}
 
 		zip( $tmp_dir, $archive );
+		rrmdir( $tmp_dir );
 
-		WP_CLI::success( sprintf( "Archived to '%s'.", $archive ) );
+		WP_CLI::success( sprintf( "Backup to '%s'.", $archive ) );
 	}
 }
 
