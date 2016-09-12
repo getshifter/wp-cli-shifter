@@ -23,7 +23,7 @@ $ wp help shifter
 Create a .zip archive for the Shifter.
 
 ```
-$ wp shifter archive
+$ wp shifter backup
 ```
 
 ## How to contribute
