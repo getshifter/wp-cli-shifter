@@ -1,6 +1,6 @@
 # wp shifter
 
-[![Build Status](https://travis-ci.org/megumiteam/wp-cli-shifter.svg?branch=master)](https://travis-ci.org/megumiteam/wp-cli-shifter)
+[![Build Status](https://travis-ci.org/getshifter/wp-cli-shifter.svg?branch=master)](https://travis-ci.org/getshifter/wp-cli-shifter)
 
 ## Requires
 
