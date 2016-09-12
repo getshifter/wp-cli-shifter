@@ -9,7 +9,7 @@
 ## Install
 
 ```
-$ wp package install shifter/wp-cli-shifter:@stable
+$ wp package install shifter/cli:@stable
 ```
 
 ## Examples
