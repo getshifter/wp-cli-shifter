@@ -20,7 +20,7 @@ See help:
 $ wp help shifter
 ```
 
-Create a .zip archive for the Shifter.
+Create a .zip archive of your site for the Shifter.
 
 ```
 $ wp shifter backup
