@@ -3,3 +3,4 @@ composer.phar
 /vendor
 .DS_Store
 installer
+npm-debug.log
