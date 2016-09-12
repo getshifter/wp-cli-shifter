@@ -1,24 +1,4 @@
-sudo: false
-
 language: php
-
-notifications:
-  email:
-    on_success: never
-    on_failure: change
-
-branches:
-  only:
-    - master
-
 php:
-  - 5.5
-  - 5.6
-  - 7.0
-
-cache:
-  - composer
-  - $HOME/.composer/cache
-
-before_script: npm run setup
-script: npm test
+- '5.5'
+- '5.4'

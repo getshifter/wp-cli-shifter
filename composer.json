@@ -1,12 +1,12 @@
 {
-    "name": "shifter/wp-cli-shifter",
-    "description": "WP-CLI command for the Shifter",
-    "homepage": "https://github.com/megumiteam/wp-cli-shifter",
+    "name": "shifter/cli",
+    "description": "WP-CLI commands for the Shifter",
+    "homepage": "https://github.com/getshifter/wp-cli-shifter",
     "license": "GPL-2.0",
     "authors": [
         {
-            "name": "Takayuki Miyauchi",
-            "homepage": "https://github.com/miya0001"
+            "name": "Shifter Team",
+            "homepage": "https://github.com/getshifter"
         }
     ],
     "autoload": {
