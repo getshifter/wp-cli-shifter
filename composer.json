@@ -18,6 +18,7 @@
         "php": ">=5.4"
     },
     "require-dev": {
-        "behat/behat": "~2.5"
+        "behat/behat": "~2.5",
+		"phpunit/phpunit": "*"
     }
 }
