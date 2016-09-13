@@ -6,39 +6,27 @@
 
 * WP-CLI 0.23 or later
 
-## Install
+## Examples
+
+Backup your WordPress files and database.
+
+```
+$ wp shifter backup [<file>]
+```
+
+Recovery from backup.
+
+```
+$ wp shifter recovery <file> [--delete]
+```
+
+## Install via package command
 
 ```
 $ wp package install shifter/cli:@stable
 ```
 
-## Examples
-
-See help:
-
-```
-$ wp help shifter
-
-NAME
-
-  wp shifter
-
-DESCRIPTION
-
-  WP-CLI commands for the Shifter.
-
-SYNOPSIS
-
-  wp shifter <command>
-
-SUBCOMMANDS
-
-  backup        Create a .zip archive as a backup for the Shifter.
-  recovery      Recovery the WordPress site from a .zip archive.
-
-```
-
-## How to contribute
+## Install manually
 
 ```
 $ mkdir -p ~/.wp-cli/commands && cd -
