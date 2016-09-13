@@ -18,18 +18,24 @@ See help:
 
 ```
 $ wp help shifter
-```
 
-Create a .zip backup.
+NAME
 
-```
-$ wp shifter backup
-```
+  wp shifter
 
-Recovery from a .zip.
+DESCRIPTION
 
-```
-$ wp shifter recovery path/to/archive.zip
+  WP-CLI commands for the Shifter.
+
+SYNOPSIS
+
+  wp shifter <command>
+
+SUBCOMMANDS
+
+  backup        Create a .zip archive as a backup for the Shifter.
+  recovery      Recovery the WordPress site from a .zip archive.
+
 ```
 
 ## How to contribute
@@ -45,9 +51,18 @@ require:
   - path/to/cli.php
 ```
 
-Run tests.
+## Automated testing
+
+Setup:
 
 ```
-$ npm run setup
-$ npm test
+$ composer install
+$ bash bin/install-wp-tests.sh wordpress_test root '' localhost latest
+$ WP_CLI_BIN_DIR=/tmp/wp-cli-phar bash bin/install-package-tests.sh
+```
+
+Then run tests:
+
+```
+$ phpunit && WP_CLI_BIN_DIR=/tmp/wp-cli-phar ./vendor/bin/behat
 ```
