@@ -69,7 +69,9 @@ class Shifter_CLI
 		$iterator = self::get_files( $src );
 		foreach ( $iterator as $item ) {
 			if ( $item->isDir() ) {
-				mkdir( $dest . '/' . $iterator->getSubPathName() );
+				if ( ! is_dir( $dest . '/' . $iterator->getSubPathName() ) ) {
+					mkdir( $dest . '/' . $iterator->getSubPathName() );
+				}
 			} else {
 				copy( $item, $dest . '/' . $iterator->getSubPathName() );
 			}
