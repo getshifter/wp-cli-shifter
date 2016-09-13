@@ -9,6 +9,12 @@ Feature: Test that `wp shifter` commands loads.
     When I run `wp help shifter backup`
     Then the return code should be 0
 
+    When I run `wp help shifter recovery`
+    Then the return code should be 0
+
+  Scenario: Tests for `wp shifter backup`.
+    Given a WP install
+
     When I run `wp shifter backup`
     Then STDOUT should contain:
       """
