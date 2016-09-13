@@ -125,6 +125,13 @@ class Shifter_CLI
 		return $destination;
 	}
 
+	/**
+	 * Unzip
+	 *
+	 * @param string $src  Path to the .zip archive.
+	 * @param string $dest Path to extract .zip.
+	 * @return string      `true` or WP_Error object.
+	 */
 	public static function unzip( $src, $dest )
 	{
 		if ( ! is_file( $src ) ) {
