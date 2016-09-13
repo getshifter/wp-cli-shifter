@@ -48,3 +48,23 @@ Feature: Test that `wp shifter` commands loads.
       """
       Error: No such file or directory.
       """
+
+    When I run `wp shifter recovery hello.zip`
+    Then STDOUT should contain:
+      """
+      Success: Recoveried from 'hello.zip'.
+      """
+
+    When I run `wp shifter recovery /tmp/backup.zip`
+    Then STDOUT should contain:
+      """
+      Success: Recoveried from '/tmp/backup.zip'.
+      """
+
+    When I try `wp shifter recovery foo.zip`
+    Then the return code should be 1
+    Then STDERR should contain:
+      """
+      Error: No such file or directory.
+      """
+
