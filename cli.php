@@ -19,7 +19,7 @@ class WP_CLI_Shifter extends WP_CLI_Command
 	 *
 	 * ## OPTIONS
 	 * [<file>]
-	 * The name of the .zip file to archive. If omitted, it will be 'archive.zip'.
+	 * : The name of the .zip file to archive. If omitted, it will be 'archive.zip'.
 	 *
 	 * ## EXAMPLES
 	 * $ wp shifter backup
@@ -30,9 +30,10 @@ class WP_CLI_Shifter extends WP_CLI_Command
 	 *
 	 * @subcommand backup
 	 */
-	function backup( $args ) {
-		$tmp_dir = tempdir( 'sft' );
-		rcopy( ABSPATH, $tmp_dir . '/webroot' );
+	function backup( $args )
+	{
+		$tmp_dir = Shifter_CLI::tempdir( 'sft' );
+		Shifter_CLI::rcopy( ABSPATH, $tmp_dir . '/webroot' );
 		WP_CLI::launch_self(
 			"db export",
 			array( $tmp_dir . "/wp.sql" ),
@@ -48,10 +49,27 @@ class WP_CLI_Shifter extends WP_CLI_Command
 			$archive = $args[0];
 		}
 
-		zip( $tmp_dir, $archive );
-		rrmdir( $tmp_dir );
+		Shifter_CLI::zip( $tmp_dir, $archive );
+		Shifter_CLI::rrmdir( $tmp_dir );
 
 		WP_CLI::success( sprintf( "Backup to '%s'.", $archive ) );
+	}
+
+	/**
+	 * Recovery the WordPress site from a .zip archive.
+	 *
+	 * ## OPTIONS
+	 * <file>
+	 * : The name of the .zip file to recovery.
+	 *
+	 * ## EXAMPLES
+	 * $ wp shifter recovery /path/to/backup.zip
+	 * Success: recoveried from '/path/to/backup.zip'.
+	 *
+	 * @subcommand recovery
+	 */
+	function recovery( $args )
+	{
 	}
 }
 

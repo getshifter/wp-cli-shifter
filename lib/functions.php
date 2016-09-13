@@ -1,106 +1,118 @@
 <?php
-/**
- * Remove a directory recursively.
- *
- * @param string $dir Path to the directory you want to remove.
- */
-function rrmdir( $dir ) {
-	$files = new RecursiveIteratorIterator(
-		new RecursiveDirectoryIterator( $dir, RecursiveDirectoryIterator::SKIP_DOTS ),
-		RecursiveIteratorIterator::CHILD_FIRST
-	);
 
-	foreach ( $files as $fileinfo ) {
-		$todo = ( $fileinfo->isDir() ? 'rmdir' : 'unlink' );
-		$todo( $fileinfo->getRealPath() );
+class Shifter_CLI
+{
+	/**
+	 * Remove a directory recursively.
+	 *
+	 * @param  string $dir Path to the directory you want to remove.
+	 * @return void
+	 */
+	public static function rrmdir( $dir ) {
+		$dir = untrailingslashit( $dir );
+
+		$files = self::get_files( $dir, RecursiveIteratorIterator::CHILD_FIRST );
+		foreach ( $files as $fileinfo ) {
+			$todo = ( $fileinfo->isDir() ? 'rmdir' : 'unlink' );
+			$todo( $fileinfo->getRealPath() );
+		}
+
+		rmdir( $dir );
 	}
 
-	rmdir($dir);
-}
-
-/**
- * Create a temporary working directory
- *
- * @param string $prefix Prefix for the temporary directory you want to create.
- */
-function tempdir( $prefix = '' ) {
-	$tempfile = tempnam( sys_get_temp_dir(), $prefix );
-	if ( file_exists( $tempfile ) ) {
-		unlink( $tempfile );
-	}
-	mkdir( $tempfile );
-	if ( is_dir( $tempfile ) ) {
-		return $tempfile;
-	}
-}
-
-/**
- * Copy directory recursively.
- *
- * @param string $source Path to the source directory.
- * @param string $dest   Path to the destination.
- */
-function rcopy( $source, $dest ) {
-	mkdir( $dest, 0755 );
-	foreach (
-	$iterator = new \RecursiveIteratorIterator(
-		new \RecursiveDirectoryIterator( $source, \RecursiveDirectoryIterator::SKIP_DOTS ),
-		\RecursiveIteratorIterator::SELF_FIRST ) as $item
-	) {
-		if ( $item->isDir() ) {
-			mkdir( $dest . DIRECTORY_SEPARATOR . $iterator->getSubPathName() );
-		} else {
-			copy( $item, $dest . DIRECTORY_SEPARATOR . $iterator->getSubPathName() );
+	/**
+	 * Create a temporary working directory
+	 *
+	 * @param  string $prefix Prefix for the temporary directory you want to create.
+	 * @return string         Path to the temporary directory.
+	 */
+	public static function tempdir( $prefix = '' ) {
+		$tempfile = tempnam( sys_get_temp_dir(), $prefix );
+		if ( file_exists( $tempfile ) ) {
+			unlink( $tempfile );
+		}
+		mkdir( $tempfile );
+		if ( is_dir( $tempfile ) ) {
+			return $tempfile;
 		}
 	}
-}
 
-/**
- * Create a zip archive from $source to $destination.
- *
- * @param string $source Path to the source directory.
- * @param string $dest   Path to the .zip file.
- */
-function zip( $source, $destination ) {
-	if ( ! extension_loaded( 'zip' ) || ! file_exists( $source ) ) {
-		return false;
+	/**
+	 * Copy directory recursively.
+	 *
+	 * @param  string $source Path to the source directory.
+	 * @param  string $dest   Path to the destination.
+	 * @return void
+	 */
+	public static function rcopy( $src, $dest ) {
+		$src = untrailingslashit( $src );
+		$dest = untrailingslashit( $dest );
+
+		if ( ! is_dir( $dest ) ) {
+			mkdir( $dest, 0755 );
+		}
+
+		$iterator = self::get_files( $src );
+		foreach ( $iterator as $item ) {
+			if ( $item->isDir() ) {
+				mkdir( $dest . '/' . $iterator->getSubPathName() );
+			} else {
+				copy( $item, $dest . '/' . $iterator->getSubPathName() );
+			}
+		}
 	}
 
-	$zip = new ZipArchive();
-	if ( ! $zip->open( $destination, ZIPARCHIVE::CREATE ) ) {
-		return false;
+	/**
+	 * Create a zip archive from $source to $destination.
+	 *
+	 * @param string $source Path to the source directory.
+	 * @param string $dest   Path to the .zip file.
+	 */
+	public static function zip( $src, $destination ) {
+		$src = untrailingslashit( $src );
+
+		if ( ! is_dir( $src ) ) {
+			return;
+		}
+
+		if ( ! extension_loaded( 'zip' ) || ! file_exists( $src ) ) {
+			return false;
+		}
+
+		$zip = new ZipArchive();
+		if ( ! $zip->open( $destination, ZIPARCHIVE::CREATE ) ) {
+			return false;
+		}
+
+		$iterator = self::get_files( $src );
+
+		foreach ( $iterator as $item ) {
+			if ( $item->isDir() ) {
+				$zip->addEmptyDir( str_replace( $src . '/', '', $item . '/' ) );
+			} else {
+				$zip->addFromString( str_replace( $src . '/', '', $item ), file_get_contents( $item ) );
+			}
+		}
+
+		return $zip->close();
 	}
 
-	$source = str_replace( '\\', '/', realpath( $source ) );
+	/**
+	 * Get file's iterator object from the directory.
+	 *
+	 * @param string $dir   Path to the directory.
+	 * @param string $flags Flags for the `RecursiveIteratorIterator()`.
+	 * @return string       Literator object of the `RecursiveIteratorIterator()`.
+	 */
+	public static function get_files( $dir, $flags = RecursiveIteratorIterator::SELF_FIRST )
+	{
+		$dir = untrailingslashit( $dir );
 
-	if ( is_dir( $source ) === true ) {
-		$files = new RecursiveIteratorIterator(
-			new RecursiveDirectoryIterator($source),
-			RecursiveIteratorIterator::SELF_FIRST
+		$iterator = new RecursiveIteratorIterator(
+			new RecursiveDirectoryIterator( $dir, RecursiveDirectoryIterator::SKIP_DOTS ),
+			$flags
 		);
 
-		foreach ( $files as $file )
-		{
-			$file = str_replace( '\\', '/', $file );
-
-			// Ignore "." and ".." folders
-			if( in_array( substr( $file, strrpos( $file, '/' )+1 ), array( '.', '..' ) ) )
-				continue;
-
-			$file = realpath( $file );
-
-			if ( is_dir( $file ) === true )
-			{
-				$zip->addEmptyDir( str_replace( $source . '/', '', $file . '/' ) );
-			}
-			else if ( is_file( $file ) === true )
-			{
-				$zip->addFromString( str_replace( $source . '/', '', $file ), file_get_contents( $file ) );
-			}
-		}
-	} elseif ( is_file( $source ) === true ) {
-		$zip->addFromString( basename( $source ), file_get_contents( $source ) );
+		return $iterator;
 	}
-
-	return $zip->close();
 }
