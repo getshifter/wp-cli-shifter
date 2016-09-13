@@ -8,7 +8,21 @@ class Shifter_CLI
 	 * @param  string $dir Path to the directory you want to remove.
 	 * @return void
 	 */
-	public static function rrmdir( $dir ) {
+	public static function rrmdir( $dir )
+	{
+		self::rempty( $dir );
+
+		rmdir( $dir );
+	}
+
+	/**
+	 * Empty a directory recursively.
+	 *
+	 * @param  string $dir Path to the directory you want to remove.
+	 * @return void
+	 */
+	public static function rempty( $dir )
+	{
 		$dir = untrailingslashit( $dir );
 
 		$files = self::get_files( $dir, RecursiveIteratorIterator::CHILD_FIRST );
@@ -16,8 +30,6 @@ class Shifter_CLI
 			$todo = ( $fileinfo->isDir() ? 'rmdir' : 'unlink' );
 			$todo( $fileinfo->getRealPath() );
 		}
-
-		rmdir( $dir );
 	}
 
 	/**
@@ -26,7 +38,8 @@ class Shifter_CLI
 	 * @param  string $prefix Prefix for the temporary directory you want to create.
 	 * @return string         Path to the temporary directory.
 	 */
-	public static function tempdir( $prefix = '' ) {
+	public static function tempdir( $prefix = '' )
+	{
 		$tempfile = tempnam( sys_get_temp_dir(), $prefix );
 		if ( file_exists( $tempfile ) ) {
 			unlink( $tempfile );
@@ -44,7 +57,8 @@ class Shifter_CLI
 	 * @param  string $dest   Path to the destination.
 	 * @return void
 	 */
-	public static function rcopy( $src, $dest ) {
+	public static function rcopy( $src, $dest )
+	{
 		$src = untrailingslashit( $src );
 		$dest = untrailingslashit( $dest );
 
@@ -69,9 +83,9 @@ class Shifter_CLI
 	 * @param string $dest   Path to the .zip file.
 	 * @return string        Path to the .zip file or WP_Error object.
 	 */
-	public static function zip( $src, $destination ) {
+	public static function zip( $src, $destination )
+	{
 		$src = untrailingslashit( $src );
-		$destination = realpath( dirname( $destination ) ) . "/" . basename( $destination );
 
 		if ( ! is_dir( $src ) ) {
 			return new WP_Error( "error", "No such file or directory." );
@@ -84,6 +98,8 @@ class Shifter_CLI
 		if ( ! extension_loaded( 'zip' ) || ! file_exists( $src ) ) {
 			return false;
 		}
+
+		$destination = realpath( dirname( $destination ) ) . "/" . basename( $destination );
 
 		$zip = new ZipArchive();
 		if ( ! $zip->open( $destination, ZIPARCHIVE::CREATE ) ) {
@@ -100,7 +116,6 @@ class Shifter_CLI
 			}
 		}
 
-
 		$zip->close();
 
 		if ( ! is_file( $destination ) ) {
@@ -108,6 +123,24 @@ class Shifter_CLI
 		}
 
 		return $destination;
+	}
+
+	public static function unzip( $src, $dest )
+	{
+		if ( ! is_file( $src ) ) {
+			return new WP_Error( "No such file or directory." );
+		}
+
+		$zip = new ZipArchive;
+		$res = $zip->open( $src );
+		if ( true === $res ) {
+			// extract it to the path we determined above
+			$zip->extractTo( $dest );
+			$zip->close();
+			return true;
+		}
+
+		return new WP_Error( "Can not open {$src}." );
 	}
 
 	/**

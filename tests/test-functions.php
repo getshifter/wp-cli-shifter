@@ -50,6 +50,29 @@ class SimpleMapTest extends WP_UnitTestCase
 	}
 
 	/**
+	 * Tests for the `Shifter_CLI::zip()`.
+	 *
+	 * @test
+	 * @since 0.1.0
+	 */
+	public function zip()
+	{
+		$src = self::mockdir();
+		$this->assertTrue( is_dir( $src ) ); // $dir should exists.
+
+		$dir = Shifter_CLI::tempdir();
+
+		// zip $src
+		Shifter_CLI::zip( $src, $dir . '/archive.zip' );
+		$this->assertTrue( is_file( $dir . '/archive.zip' ) );
+
+		// unzip to $dir . "/tmp"
+		mkdir( $dir . "/tmp" );
+		Shifter_CLI::unzip( $dir . '/archive.zip', $dir . "/tmp" );
+		$this->assertTrue( self::md5sum( $src ) === self::md5sum( $dir . "/tmp" ) );
+	}
+
+	/**
 	 * Create files and directories as mock for the test.
 	 *
 	 * @since  0.1.0
@@ -59,9 +82,9 @@ class SimpleMapTest extends WP_UnitTestCase
 	{
 		$dir = Shifter_CLI::tempdir();
 		mkdir( $dir . "/dir01" );
-		file_put_contents( $dir . "/dir01/dir01.txt", "" );
+		file_put_contents( $dir . "/dir01/dir01.txt", time() );
 		mkdir( $dir . "/dir02" );
-		file_put_contents( $dir . "/dir02/dir02.txt", "" );
+		file_put_contents( $dir . "/dir02/dir02.txt", time() );
 
 		return $dir;
 	}
