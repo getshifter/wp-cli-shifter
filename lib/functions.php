@@ -173,4 +173,21 @@ class Shifter_CLI
 
 		return $iterator;
 	}
+
+	/**
+	 * Get an array from `$assoc_args`.
+	 *
+	 * @param array  $assoc_args   `$assoc_args` of the WP-CLI.
+	 * @param string $field        Field name.
+	 * @return string              An array of args.
+	 */
+	public static function assoc_args_to_array( $assoc_args, $field )
+	{
+		if ( ! empty( $assoc_args[$field] ) ) {
+			$args = preg_split( "/,/", $assoc_args[$field] );
+			return array_map( 'trim', $args );
+		} else {
+			return array();
+		}
+	}
 }

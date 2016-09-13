@@ -27,21 +27,28 @@ class WP_CLI_Shifter extends WP_CLI_Command
 	 *
 	 * ## EXAMPLES
 	 *
-	 * $ wp shifter backup
-	 * Success: Backuped to 'archive.zip'.
+	 *   # Backup will be placed as `./archive.zip`.
+	 *   $ wp shifter backup
+	 *   Success: Backuped to 'archive.zip'.
 	 *
-	 * $ wp shifter backup /path/to/hello.zip
-	 * Success: Backuped to '/path/to/hello.zip'.
+	 *   # You can specific file name of the backup.
+	 *   $ wp shifter backup /path/to/hello.zip
+	 *   Success: Backuped to '/path/to/hello.zip'.
 	 *
-	 * $ wp shifter backup --exclude=wp-config.php,wp-content
-	 * Success: Backuped to '/path/to/hello.zip'.
+	 *   # You can use option `--exclude`.
+	 *   $ wp shifter backup --exclude=wp-config.php,wp-content/uploads/photo.jpg
+	 *   Success: Backuped to '/path/to/hello.zip'.
 	 *
 	 * @subcommand backup
 	 */
 	function backup( $args, $assoc_args )
 	{
 		$tmp_dir = Shifter_CLI::tempdir( 'SFT' );
-		Shifter_CLI::rcopy( ABSPATH, $tmp_dir . '/webroot' );
+
+		$excludes = Shifter_CLI::assoc_args_to_array( $assoc_args, "exclude" );
+
+		Shifter_CLI::rcopy( ABSPATH, $tmp_dir . '/webroot', $excludes );
+
 		WP_CLI::launch_self(
 			"db export",
 			array( $tmp_dir . "/wp.sql" ),
@@ -70,15 +77,28 @@ class WP_CLI_Shifter extends WP_CLI_Command
 	 * Recovery the WordPress site from a .zip archive.
 	 *
 	 * ## OPTIONS
+	 *
 	 * <file>
 	 * : The name of the .zip file to recovery.
 	 *
 	 * [--delete]
 	 * : Delete extraneous files from WordPress files.
 	 *
+	 * [--exclude=<files>]
+	 * : Exclude specfic files to recovery.
+	 *
 	 * ## EXAMPLES
-	 * $ wp shifter recovery /path/to/backup.zip
-	 * Success: recoveried from '/path/to/backup.zip'.
+	 *
+	 *   $ wp shifter recovery /path/to/backup.zip
+	 *   Success: recoveried from '/path/to/backup.zip'.
+	 *
+	 *   # Delete extraneous files from WordPress files.
+	 *   $ wp shifter recovery /path/to/backup.zip --delete
+	 *   Success: recoveried from '/path/to/backup.zip'.
+	 *
+	 *   # You can use option `--exclude`.
+	 *   $ wp shifter recovery archive.zip --exclude=wp-config.php
+	 *   Success: recoveried from 'archive.zip'.
 	 *
 	 * @subcommand recovery
 	 */
@@ -102,7 +122,8 @@ class WP_CLI_Shifter extends WP_CLI_Command
 			Shifter_CLI::rempty( ABSPATH );
 		}
 
-		Shifter_CLI::rcopy( $tmp_dir . '/webroot', ABSPATH );
+		$excludes = Shifter_CLI::assoc_args_to_array( $assoc_args, "exclude" );
+		Shifter_CLI::rcopy( $tmp_dir . '/webroot', ABSPATH, $excludes );
 
 		if ( is_file( $tmp_dir . "/wp.sql" ) ) {
 			$result = WP_CLI::launch_self(
