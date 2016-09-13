@@ -75,3 +75,6 @@ Feature: Test that `wp shifter` commands loads.
       Success: Recoveried from '/tmp/backup.zip'.
       """
     And the test.txt file should not exist
+
+    When I run `wp core version`
+    Then the return code should be 0
