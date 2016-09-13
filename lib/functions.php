@@ -53,11 +53,12 @@ class Shifter_CLI
 	/**
 	 * Copy directory recursively.
 	 *
-	 * @param  string $source Path to the source directory.
-	 * @param  string $dest   Path to the destination.
+	 * @param  string $source  Path to the source directory.
+	 * @param  string $dest    Path to the destination.
+	 * @param  array  $exclude An array of the files to exclude.
 	 * @return void
 	 */
-	public static function rcopy( $src, $dest )
+	public static function rcopy( $src, $dest, $exclude = array() )
 	{
 		$src = untrailingslashit( $src );
 		$dest = untrailingslashit( $dest );
@@ -73,7 +74,9 @@ class Shifter_CLI
 					mkdir( $dest . '/' . $iterator->getSubPathName() );
 				}
 			} else {
-				copy( $item, $dest . '/' . $iterator->getSubPathName() );
+				if ( ! in_array( $iterator->getSubPathName(), $exclude ) ) {
+					copy( $item, $dest . '/' . $iterator->getSubPathName() );
+				}
 			}
 		}
 	}

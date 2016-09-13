@@ -18,19 +18,27 @@ class WP_CLI_Shifter extends WP_CLI_Command
 	 * Create a .zip archive as a backup for the Shifter.
 	 *
 	 * ## OPTIONS
+	 *
 	 * [<file>]
 	 * : The name of the .zip file to archive. If omitted, it will be 'archive.zip'.
 	 *
+	 * [--exclude=<files>]
+	 * : Exclude specfic files from the backup.
+	 *
 	 * ## EXAMPLES
+	 *
 	 * $ wp shifter backup
 	 * Success: Backuped to 'archive.zip'.
 	 *
 	 * $ wp shifter backup /path/to/hello.zip
 	 * Success: Backuped to '/path/to/hello.zip'.
 	 *
+	 * $ wp shifter backup --exclude=wp-config.php,wp-content
+	 * Success: Backuped to '/path/to/hello.zip'.
+	 *
 	 * @subcommand backup
 	 */
-	function backup( $args )
+	function backup( $args, $assoc_args )
 	{
 		$tmp_dir = Shifter_CLI::tempdir( 'SFT' );
 		Shifter_CLI::rcopy( ABSPATH, $tmp_dir . '/webroot' );

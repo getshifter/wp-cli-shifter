@@ -47,6 +47,12 @@ class SimpleMapTest extends WP_UnitTestCase
 		// Copy directory recursively then check md5.
 		Shifter_CLI::rcopy( $src, $dest );
 		$this->assertTrue( self::md5sum( $src ) === self::md5sum( $dest ) );
+
+		$dest = Shifter_CLI::tempdir();
+		Shifter_CLI::rcopy( $src, $dest, array( "dir01/dir01-01.txt" ) );
+		$this->assertFalse( is_file( $dest . '/dir01/dir01-01.txt' ) );
+		$this->assertTrue( is_file( $dest . '/dir01/dir01-02.txt' ) );
+		$this->assertTrue( is_file( $dest . '/dir02/dir02-01.txt' ) );
 	}
 
 	/**
@@ -82,9 +88,10 @@ class SimpleMapTest extends WP_UnitTestCase
 	{
 		$dir = Shifter_CLI::tempdir();
 		mkdir( $dir . "/dir01" );
-		file_put_contents( $dir . "/dir01/dir01.txt", time() );
+		file_put_contents( $dir . "/dir01/dir01-01.txt", time() );
+		file_put_contents( $dir . "/dir01/dir01-02.txt", time() );
 		mkdir( $dir . "/dir02" );
-		file_put_contents( $dir . "/dir02/dir02.txt", time() );
+		file_put_contents( $dir . "/dir02/dir02-01.txt", time() );
 
 		return $dir;
 	}
