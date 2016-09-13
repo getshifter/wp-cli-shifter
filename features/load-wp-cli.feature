@@ -68,3 +68,8 @@ Feature: Test that `wp shifter` commands loads.
       Error: No such file or directory.
       """
 
+    When I run `wp shifter recovery /tmp/backup.zip --delete`
+    Then STDOUT should contain:
+      """
+      Success: Recoveried from '/tmp/backup.zip'.
+      """
