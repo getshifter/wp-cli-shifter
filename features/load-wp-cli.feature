@@ -62,6 +62,13 @@ Feature: Test that `wp shifter` commands loads.
     When I run `touch test.txt`
     Then the test.txt file should exist
 
+    When I try `wp shifter recovery foo/bar/hello.zip`
+    Then the return code should be 1
+    Then STDERR should contain:
+      """
+      Error: No such file or directory.
+      """
+
     When I run `wp shifter recovery /tmp/backup.zip`
     Then STDOUT should contain:
       """
