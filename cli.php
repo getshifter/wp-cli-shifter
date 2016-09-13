@@ -90,7 +90,7 @@ class WP_CLI_Shifter extends WP_CLI_Command
 			WP_CLI::error( sprintf( "Can't recovery from '%s'.", $args[0] ) );
 		}
 
-		if ( empty( $assoc_args['delete'] ) ) {
+		if ( ! empty( $assoc_args['delete'] ) ) {
 			Shifter_CLI::rempty( ABSPATH );
 		}
 
