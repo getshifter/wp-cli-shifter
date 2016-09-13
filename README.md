@@ -41,14 +41,15 @@ SUBCOMMANDS
 ## How to contribute
 
 ```
-$ git clone git@github.com:megumiteam/wp-cli-shifter.git
+$ mkdir -p ~/.wp-cli/commands && cd -
+$ git clone git@github.com:getshifter/wp-cli-shifter.git
 ```
 
 Add following into your `~/.wp-cli/config.yml`.
 
 ```
 require:
-  - path/to/cli.php
+  - commands/wp-cli-shifter/cli.php
 ```
 
 ## Automated testing
