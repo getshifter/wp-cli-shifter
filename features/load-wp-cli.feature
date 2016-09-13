@@ -23,6 +23,10 @@ Feature: Test that `wp shifter` commands loads.
     When I run `wp shifter backup hello.zip`
     Then STDOUT should contain:
       """
-      Success: Backup to 'hello.zip'
+      Success: Backup to
+      """
+    And STDOUT should contain:
+      """
+      hello.zip
       """
     And the hello.zip file should exist
