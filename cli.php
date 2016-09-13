@@ -44,15 +44,18 @@ class WP_CLI_Shifter extends WP_CLI_Command
 		);
 
 		if ( empty( $args[0] ) ) {
-			$archive = "archive.zip";
+			$archive = getcwd() . "/archive.zip";
 		} else {
 			$archive = $args[0];
 		}
 
-		Shifter_CLI::zip( $tmp_dir, $archive );
+		$res = Shifter_CLI::zip( $tmp_dir, $archive );
 		Shifter_CLI::rrmdir( $tmp_dir );
+		if ( is_wp_error( $res ) ) {
+			WP_CLI::error( $res->get_error_message() );
+		}
 
-		WP_CLI::success( sprintf( "Backup to '%s'.", $archive ) );
+		WP_CLI::success( sprintf( "Backup to '%s'.", $res ) );
 	}
 
 	/**

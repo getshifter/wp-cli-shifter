@@ -67,12 +67,18 @@ class Shifter_CLI
 	 *
 	 * @param string $source Path to the source directory.
 	 * @param string $dest   Path to the .zip file.
+	 * @return string        Path to the .zip file or WP_Error object.
 	 */
 	public static function zip( $src, $destination ) {
 		$src = untrailingslashit( $src );
+		$destination = realpath( dirname( $destination ) ) . "/" . basename( $destination );
 
 		if ( ! is_dir( $src ) ) {
-			return;
+			return new WP_Error( "error", "No such file or directory." );
+		}
+
+		if ( ! is_dir( dirname( $destination ) ) ) {
+			return new WP_Error( "error", "No such file or directory." );
 		}
 
 		if ( ! extension_loaded( 'zip' ) || ! file_exists( $src ) ) {
@@ -81,7 +87,7 @@ class Shifter_CLI
 
 		$zip = new ZipArchive();
 		if ( ! $zip->open( $destination, ZIPARCHIVE::CREATE ) ) {
-			return false;
+			return new WP_Error( "", "No such file or directory." );
 		}
 
 		$iterator = self::get_files( $src );
@@ -94,7 +100,14 @@ class Shifter_CLI
 			}
 		}
 
-		return $zip->close();
+
+		$zip->close();
+
+		if ( ! is_file( $destination ) ) {
+			return new WP_Error( "error", "No such file or directory." );
+		}
+
+		return $destination;
 	}
 
 	/**

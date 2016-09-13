@@ -12,7 +12,11 @@ Feature: Test that `wp shifter` commands loads.
     When I run `wp shifter backup`
     Then STDOUT should contain:
       """
-      Success: Backup to 'archive.zip'
+      Success: Backup to
+      """
+    And STDOUT should contain:
+      """
+      archive.zip
       """
     And the archive.zip file should exist
 
