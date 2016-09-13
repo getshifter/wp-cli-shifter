@@ -20,10 +20,16 @@ See help:
 $ wp help shifter
 ```
 
-Create a .zip archive of your site for the Shifter.
+Create a .zip backup.
 
 ```
 $ wp shifter backup
+```
+
+Recovery from a .zip.
+
+```
+$ wp shifter recovery path/to/archive.zip
 ```
 
 ## How to contribute
