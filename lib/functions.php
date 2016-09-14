@@ -18,17 +18,31 @@ class Shifter_CLI
 	/**
 	 * Empty a directory recursively.
 	 *
-	 * @param  string $dir Path to the directory you want to remove.
+	 * @param  string $dir     Path to the directory you want to remove.
+	 * @param  array  $exclude An array of the files to exclude.
 	 * @return void
 	 */
-	public static function rempty( $dir )
+	public static function rempty( $dir, $excludes = array() )
 	{
 		$dir = untrailingslashit( $dir );
 
 		$files = self::get_files( $dir, RecursiveIteratorIterator::CHILD_FIRST );
 		foreach ( $files as $fileinfo ) {
-			$todo = ( $fileinfo->isDir() ? 'rmdir' : 'unlink' );
-			$todo( $fileinfo->getRealPath() );
+			if ( $fileinfo->isDir() ) {
+				$skip = false;
+				foreach ( $excludes as $exclude ) {
+					if ( 0 === strpos( $exclude, $files->getSubPathName() ) ) {
+						$skip = true;
+					}
+				}
+				if ( ! $skip ) {
+					rmdir( $fileinfo->getRealPath() );
+				}
+			} else {
+				if ( ! in_array( $files->getSubPathName(), $excludes ) ) {
+					unlink( $fileinfo->getRealPath() );
+				}
+			}
 		}
 	}
 

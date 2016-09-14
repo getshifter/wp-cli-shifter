@@ -118,11 +118,12 @@ class WP_CLI_Shifter extends WP_CLI_Command
 			WP_CLI::error( sprintf( "Can't recovery from '%s'.", $args[0] ) );
 		}
 
+		$excludes = Shifter_CLI::assoc_args_to_array( $assoc_args, "exclude" );
+
 		if ( ! empty( $assoc_args['delete'] ) ) {
-			Shifter_CLI::rempty( ABSPATH );
+			Shifter_CLI::rempty( ABSPATH, $excludes );
 		}
 
-		$excludes = Shifter_CLI::assoc_args_to_array( $assoc_args, "exclude" );
 		Shifter_CLI::rcopy( $tmp_dir . '/webroot', ABSPATH, $excludes );
 
 		if ( is_file( $tmp_dir . "/wp.sql" ) ) {

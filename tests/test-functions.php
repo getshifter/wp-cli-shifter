@@ -3,6 +3,33 @@
 class SimpleMapTest extends WP_UnitTestCase
 {
 	/**
+	 * Tests for the `Shifter_CLI::rempty()`.
+	 *
+	 * @test
+	 * @since 0.1.0
+	 */
+	public function rempty()
+	{
+		$dir = self::mockdir();
+		$files = Shifter_CLI::get_files( $dir );
+		$this->assertSame( 7, iterator_count($files) );
+
+		$dir = self::mockdir();
+		Shifter_CLI::rempty( $dir );
+		$files = Shifter_CLI::get_files( $dir );
+		$this->assertSame( 0, iterator_count($files) );
+
+		$dir = self::mockdir();
+		var_dump($dir);
+		Shifter_CLI::rempty( $dir, array(
+			"dir02/dir02-01.txt",
+			"dir01/dir01-01/dir01-01-01.txt"
+		) );
+		$files = Shifter_CLI::get_files( $dir );
+		$this->assertSame( 5, iterator_count($files) );
+	}
+
+	/**
 	 * Tests for the `Shifter_CLI::tempdir()`.
 	 *
 	 * @test
@@ -90,6 +117,8 @@ class SimpleMapTest extends WP_UnitTestCase
 		mkdir( $dir . "/dir01" );
 		file_put_contents( $dir . "/dir01/dir01-01.txt", time() );
 		file_put_contents( $dir . "/dir01/dir01-02.txt", time() );
+		mkdir( $dir . "/dir01/dir01-01" );
+		file_put_contents( $dir . "/dir01/dir01-01/dir01-01-01.txt", time() );
 		mkdir( $dir . "/dir02" );
 		file_put_contents( $dir . "/dir02/dir02-01.txt", time() );
 
