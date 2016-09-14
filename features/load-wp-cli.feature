@@ -76,12 +76,13 @@ Feature: Test that `wp shifter` commands loads.
       """
     And the test.txt file should exist
 
-    When I run `wp shifter recovery /tmp/backup.zip --delete`
+    When I run `wp shifter recovery /tmp/backup.zip --exclude=readme.html --delete`
     Then STDOUT should contain:
       """
       Success: Recoveried from '/tmp/backup.zip'.
       """
     And the test.txt file should not exist
+    And the readme.html file should exist
 
     When I run `wp core version`
     Then the return code should be 0
