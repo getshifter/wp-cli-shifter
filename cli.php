@@ -15,7 +15,7 @@ require_once( dirname( __FILE__ ) . "/lib/functions.php" );
 class WP_CLI_Shifter extends WP_CLI_Command
 {
 	/**
-	 * Create a .zip archive as a backup for the Shifter.
+	 * Create a .zip archive as a archive for the Shifter.
 	 *
 	 * ## OPTIONS
 	 *
@@ -23,25 +23,25 @@ class WP_CLI_Shifter extends WP_CLI_Command
 	 * : The name of the .zip file to archive. If omitted, it will be 'archive.zip'.
 	 *
 	 * [--exclude=<files>]
-	 * : Exclude specfic files from the backup.
+	 * : Exclude specfic files from the archive.
 	 *
 	 * ## EXAMPLES
 	 *
-	 *   # Backup will be placed as `./archive.zip`.
-	 *   $ wp shifter backup
-	 *   Success: Backuped to 'archive.zip'.
+	 *   # archive will be placed as `./archive.zip`.
+	 *   $ wp shifter archive
+	 *   Success: Archived to 'archive.zip'.
 	 *
-	 *   # You can specific file name of the backup.
-	 *   $ wp shifter backup /path/to/hello.zip
-	 *   Success: Backuped to '/path/to/hello.zip'.
+	 *   # You can specific file name of the archive.
+	 *   $ wp shifter archive /path/to/hello.zip
+	 *   Success: Archived to '/path/to/hello.zip'.
 	 *
 	 *   # You can use option `--exclude`.
-	 *   $ wp shifter backup --exclude=wp-config.php,wp-content/uploads/photo.jpg
-	 *   Success: Backuped to '/path/to/hello.zip'.
+	 *   $ wp shifter archive --exclude=wp-config.php,wp-content/uploads/photo.jpg
+	 *   Success: Archived to '/path/to/hello.zip'.
 	 *
-	 * @subcommand backup
+	 * @subcommand archive
 	 */
-	function backup( $args, $assoc_args )
+	function archive( $args, $assoc_args )
 	{
 		$tmp_dir = Shifter_CLI::tempdir( 'SFT' );
 
@@ -70,39 +70,39 @@ class WP_CLI_Shifter extends WP_CLI_Command
 			WP_CLI::error( $res->get_error_message() );
 		}
 
-		WP_CLI::success( sprintf( "Backup to '%s'.", $res ) );
+		WP_CLI::success( sprintf( "Archived to '%s'.", $res ) );
 	}
 
 	/**
-	 * Recovery the WordPress site from a .zip archive.
+	 * Extract the WordPress site from a .zip archive.
 	 *
 	 * ## OPTIONS
 	 *
 	 * <file>
-	 * : The name of the .zip file to recovery.
+	 * : The name of the .zip file to extract.
 	 *
 	 * [--delete]
 	 * : Delete extraneous files from WordPress files.
 	 *
 	 * [--exclude=<files>]
-	 * : Exclude specfic files to recovery.
+	 * : Exclude specfic files to extract.
 	 *
 	 * ## EXAMPLES
 	 *
-	 *   $ wp shifter recovery /path/to/backup.zip
-	 *   Success: recoveried from '/path/to/backup.zip'.
+	 *   $ wp shifter extract /path/to/archive.zip
+	 *   Success: Extracted from '/path/to/archive.zip'.
 	 *
 	 *   # Delete extraneous files from WordPress files.
-	 *   $ wp shifter recovery /path/to/backup.zip --delete
-	 *   Success: recoveried from '/path/to/backup.zip'.
+	 *   $ wp shifter extract /path/to/archive.zip --delete
+	 *   Success: Extracted from '/path/to/archive.zip'.
 	 *
 	 *   # You can use option `--exclude`.
-	 *   $ wp shifter recovery archive.zip --exclude=wp-config.php
-	 *   Success: recoveried from 'archive.zip'.
+	 *   $ wp shifter extract archive.zip --exclude=wp-config.php
+	 *   Success: Extracted from 'archive.zip'.
 	 *
-	 * @subcommand recovery
+	 * @subcommand extract
 	 */
-	function recovery( $args, $assoc_args )
+	function extract( $args, $assoc_args )
 	{
 		if ( ! is_file( $args[0] ) ) {
 			WP_CLI::error( "No such file or directory." );
@@ -115,7 +115,7 @@ class WP_CLI_Shifter extends WP_CLI_Command
 
 		if ( ! is_dir( $tmp_dir . '/webroot' ) || ! is_file( $tmp_dir . '/wp.sql' ) ) {
 			Shifter_CLI::rrmdir( $tmp_dir );
-			WP_CLI::error( sprintf( "Can't recovery from '%s'.", $args[0] ) );
+			WP_CLI::error( sprintf( "Can't extract from '%s'.", $args[0] ) );
 		}
 
 		$excludes = Shifter_CLI::assoc_args_to_array( $assoc_args, "exclude" );
@@ -142,7 +142,7 @@ class WP_CLI_Shifter extends WP_CLI_Command
 		}
 
 		Shifter_CLI::rrmdir( $tmp_dir );
-		WP_CLI::success( sprintf( "Recoveried from '%s'.", $args[0] ) );
+		WP_CLI::success( sprintf( "Extracted from '%s'.", $args[0] ) );
 	}
 }
 

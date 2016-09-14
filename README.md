@@ -11,13 +11,13 @@
 Backup your WordPress files and database.
 
 ```shell
-$ wp shifter backup [<file>] [--exclude=<files>]
+$ wp shifter archive [<file>] [--exclude=<files>]
 ```
 
-Recovery from backup.
+Extract from backup.
 
 ```shell
-$ wp shifter recovery <file> [--delete] [--exclude=<files>]
+$ wp shifter extract <file> [--delete] [--exclude=<files>]
 ```
 
 ## Installing via package command
