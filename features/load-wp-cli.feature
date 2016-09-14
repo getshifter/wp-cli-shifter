@@ -57,10 +57,13 @@ Feature: Test that `wp shifter` commands loads.
 
   Scenario: Tests for the `wp shifter recovery`
     Given a WP install
-    Given I run `wp shifter backup /tmp/backup.zip`
-
-    When I run `touch test.txt`
-    Then the test.txt file should exist
+    And a wp-content/plugins/example.php file:
+      """
+      // Plugin Name: Example Plugin
+      // Network: true
+      """
+    And I run `wp shifter backup /tmp/backup.zip`
+    And I run `wp plugin uninstall example`
 
     When I try `wp shifter recovery foo/bar/hello.zip`
     Then the return code should be 1
@@ -69,20 +72,19 @@ Feature: Test that `wp shifter` commands loads.
       Error: No such file or directory.
       """
 
+    When I run `wp shifter recovery /tmp/backup.zip --exclude=wp-content/plugins/example.php --delete`
+    Then STDOUT should contain:
+      """
+      Success: Recoveried from '/tmp/backup.zip'.
+      """
+    And the wp-content/plugins/example.php file should not exist
+
     When I run `wp shifter recovery /tmp/backup.zip`
     Then STDOUT should contain:
       """
       Success: Recoveried from '/tmp/backup.zip'.
       """
-    And the test.txt file should exist
-
-    When I run `wp shifter recovery /tmp/backup.zip --exclude=readme.html --delete`
-    Then STDOUT should contain:
-      """
-      Success: Recoveried from '/tmp/backup.zip'.
-      """
-    And the test.txt file should not exist
-    And the readme.html file should exist
+    And the wp-content/plugins/example.php file should exist
 
     When I run `wp core version`
     Then the return code should be 0
