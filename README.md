@@ -2,6 +2,12 @@
 
 [![Build Status](https://travis-ci.org/getshifter/wp-cli-shifter.svg?branch=master)](https://travis-ci.org/getshifter/wp-cli-shifter)
 
+The Shifter is a serverless hosting solution for WordPress.
+
+https://beta.getshifter.io/
+
+`wp shifter` is a WP-CLI command that enables you to import/export your WordPress site for the Shifter.
+
 ## Requires
 
 * WP-CLI 0.23 or later
