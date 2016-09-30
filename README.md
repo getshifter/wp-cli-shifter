@@ -29,7 +29,7 @@ $ wp shifter extract <file> [--delete] [--exclude=<files>]
 ## Installing via package command
 
 ```shell
-$ wp package install getshifter/wp-cli-shifter:@stable
+$ wp package install shifter/cli:@stable
 ```
 
 ## Installing manually
