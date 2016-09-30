@@ -1,6 +1,11 @@
 behat.phar
+bin
 composer.phar
 /vendor
 .DS_Store
 installer
 npm-debug.log
+features
+tests
+utils
+phpunit.xml
