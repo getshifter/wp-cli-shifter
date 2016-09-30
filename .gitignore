@@ -9,3 +9,5 @@ features
 tests
 utils
 phpunit.xml
+.editorconfig
+.travis.yml
