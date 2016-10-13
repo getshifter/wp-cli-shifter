@@ -14,27 +14,45 @@ https://getshifter.io/
 
 ## Subcommands
 
-Backup your WordPress files and database.
+### Backup your WordPress files and database.
 
-```shell
+```bash
 $ wp shifter archive [<file>] [--exclude=<files>]
 ```
 
-Extract from backup.
+You can exclude `wp-config.php`.
 
-```shell
+```
+$ wp shifter archive /path/to/archive.zip --exclude=wp-config.php
+```
+
+### Extract from backup.
+
+```bash
 $ wp shifter extract <file> [--delete] [--exclude=<files>]
+```
+
+If you add `--delete` option, this command will remove all files before extracting.
+
+```bash
+$ wp shifter extract /path/to/archive.zip --delete
+```
+
+You can exclude specific files from archive.
+
+```bash
+$ wp shifter extract /path/to/archive.zip --exclude=wp-config.php
 ```
 
 ## Installing via package command
 
-```shell
+```bash
 $ wp package install shifter/cli:@stable
 ```
 
 ## Installing manually
 
-```shell
+```bash
 $ mkdir -p ~/.wp-cli/commands && cd -
 $ git clone git@github.com:getshifter/wp-cli-shifter.git
 ```
@@ -50,7 +68,7 @@ require:
 
 Setup:
 
-```shell
+```bash
 $ composer install
 $ bash bin/install-wp-tests.sh wordpress_test root '' localhost latest
 $ WP_CLI_BIN_DIR=/tmp/wp-cli-phar bash bin/install-package-tests.sh
@@ -58,6 +76,6 @@ $ WP_CLI_BIN_DIR=/tmp/wp-cli-phar bash bin/install-package-tests.sh
 
 Then run tests:
 
-```shell
+```bash
 $ phpunit && WP_CLI_BIN_DIR=/tmp/wp-cli-phar ./vendor/bin/behat
 ```
