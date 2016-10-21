@@ -1,6 +1,7 @@
 {
     "name": "shifter/cli",
     "description": "WP-CLI commands for the Shifter",
+    "type": "wp-cli-package",
     "homepage": "https://github.com/getshifter/wp-cli-shifter",
     "license": "GPL-2.0",
     "authors": [
