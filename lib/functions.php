@@ -1,9 +1,5 @@
 <?php
 
-require dirname( __FILE__ ) . '/../lib/aws.phar';
-
-use Aws\CognitoIdentityProvider\CognitoIdentityProviderClient;
-
 class Shifter_CLI
 {
 	/**
