@@ -3,6 +3,14 @@
 class SimpleMapTest extends WP_UnitTestCase
 {
 	/**
+	 * @test
+	 */
+	public function login()
+	{
+		Shifter_CLI::login_with_user_and_pass( 'hello', 'hello' );
+	}
+
+	/**
 	 * Tests for the `Shifter_CLI::rempty()`.
 	 *
 	 * @test
@@ -20,7 +28,7 @@ class SimpleMapTest extends WP_UnitTestCase
 		$this->assertSame( 0, iterator_count($files) );
 
 		$dir = self::mockdir();
-		var_dump($dir);
+
 		Shifter_CLI::rempty( $dir, array(
 			"dir02/dir02-01.txt",
 			"dir01/dir01-01/dir01-01-01.txt"

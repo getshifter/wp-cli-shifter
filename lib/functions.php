@@ -1,5 +1,16 @@
 <?php
 
+require dirname( __FILE__ ) . '/../lib/aws.phar';
+
+use Aws\CognitoIdentityProvider\CognitoIdentityProviderClient;
+
+// AWSCognito.config.region = 'us-east-1'
+
+// var poolData = {
+// 	UserPoolId : 'us-east-1_vGsjVHWRO',
+// 	ClientId : '3t3ctt40691vpqe76c85772a4g'
+// }
+
 class Shifter_CLI
 {
 	public static function upload_archive( $args, $assoc_args )
@@ -7,13 +18,30 @@ class Shifter_CLI
 		sleep( 5 );
 	}
 
+	public static function login_with_user_and_pass( $user, $pass )
+	{
+		$client = new CognitoIdentityProviderClient( array(
+			"region"  => "us-east-1",
+			"version" => "2016-04-18",
+		) );
+
+		$identityClient = $client->CreateUserPoolClient( array(
+			'ClientName' => '3t3ctt40691vpqe76c85772a4g', // REQUIRED
+			'UserPoolId' => 'us-east-1_vGsjVHWRO', // REQUIRED
+		) );
+
+		var_dump( $idResp );
+	}
+
 	/**
-	 * Login with user and password with prompt.
+	 * Plompt login with user and password with prompt.
 	 *
 	 * @return bool or WP_CLI::Error()
 	 */
-	public static function login_with_user_and_pass()
+	public static function prompt_user_and_pass()
 	{
+		$region = 'us-east-1';
+
 		$user = trim( cli\prompt(
 			'Shifter Username',
 			$default = false,
@@ -28,7 +56,7 @@ class Shifter_CLI
 			$hide = true
 		) );
 
-		return true;
+		return array( 'user' => $user, 'pass' => $pass );
 	}
 
 	/**

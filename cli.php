@@ -131,7 +131,11 @@ class WP_CLI_Shifter extends WP_CLI_Command
 	 */
 	public function upload( $args, $assoc_args )
 	{
-		$result = Shifter_CLI::login_with_user_and_pass();
+		$user = Shifter_CLI::prompt_user_and_pass();
+		$result = Shifter_CLI::login_with_user_and_pass(
+			$user['user'],
+			$user['pass']
+		);
 		if ( $result ) {
 			WP_CLI::line( "You are logged in." );
 		} else {
