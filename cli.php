@@ -14,6 +14,8 @@ require_once( dirname( __FILE__ ) . "/lib/functions.php" );
  */
 class WP_CLI_Shifter extends WP_CLI_Command
 {
+	private $version = "v1.1.0";
+
 	/**
 	 * Create a .zip archive as a archive for the Shifter.
 	 *
@@ -128,6 +130,16 @@ class WP_CLI_Shifter extends WP_CLI_Command
 		$progress->tick();
 
 		WP_CLI::success( sprintf( "Extracted from '%s'.", $args[0] ) );
+	}
+
+	/**
+	 * Prints current version of the shifter/cli.
+	 *
+	 * @when before_wp_load
+	 */
+	public function version()
+	{
+		WP_CLI::line( $this->version );
 	}
 }
 
