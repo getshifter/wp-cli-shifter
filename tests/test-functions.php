@@ -3,14 +3,6 @@
 class SimpleMapTest extends WP_UnitTestCase
 {
 	/**
-	 * @test
-	 */
-	public function login()
-	{
-		Shifter_CLI::login_with_user_and_pass( 'hello', 'hello' );
-	}
-
-	/**
 	 * Tests for the `Shifter_CLI::rempty()`.
 	 *
 	 * @test
