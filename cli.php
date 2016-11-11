@@ -43,33 +43,7 @@ class WP_CLI_Shifter extends WP_CLI_Command
 	 */
 	function archive( $args, $assoc_args )
 	{
-		$tmp_dir = Shifter_CLI::tempdir( 'SFT' );
-
-		$excludes = Shifter_CLI::assoc_args_to_array( $assoc_args, "exclude" );
-
-		Shifter_CLI::rcopy( ABSPATH, $tmp_dir . '/webroot', $excludes );
-
-		WP_CLI::launch_self(
-			"db export",
-			array( $tmp_dir . "/wp.sql" ),
-			array(),
-			true,
-			true,
-			array( 'path' => WP_CLI::get_runner()->config['path'] )
-		);
-
-		if ( empty( $args[0] ) ) {
-			$archive = getcwd() . "/archive.zip";
-		} else {
-			$archive = $args[0];
-		}
-
-		$res = Shifter_CLI::zip( $tmp_dir, $archive );
-		Shifter_CLI::rrmdir( $tmp_dir );
-		if ( is_wp_error( $res ) ) {
-			WP_CLI::error( $res->get_error_message() );
-		}
-
+		$res = Shifter_CLI::create_archive( $args, $assoc_args );
 		WP_CLI::success( sprintf( "Archived to '%s'.", $res ) );
 	}
 
@@ -143,6 +117,39 @@ class WP_CLI_Shifter extends WP_CLI_Command
 
 		Shifter_CLI::rrmdir( $tmp_dir );
 		WP_CLI::success( sprintf( "Extracted from '%s'.", $args[0] ) );
+	}
+
+	/**
+	 * Upload a .zip archive to the Shifter.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *   $ wp shifter upload /path/to/archive.zip
+	 *   Success: The '/path/to/archive.zip' successfully uploaded.
+	 *
+	 * @subcommand upload
+	 */
+	public function upload( $args, $assoc_args )
+	{
+		$result = Shifter_CLI::login_with_user_and_pass();
+		if ( $result ) {
+			WP_CLI::line( "You are logged in." );
+		} else {
+			WP_CLI::error( "Login failed. Please try again." );
+		}
+
+		// full path to the archive
+		$archive = tempnam( sys_get_temp_dir(), "sft" ) . '.zip';
+
+		Shifter_CLI::create_archive( array( $archive ), $assoc_args );
+		WP_CLI::success( "Created an archive." );
+
+		$progress = new \cli\progress\Bar( 'Uploading an archive: ', 2 );
+		$progress->tick();
+		Shifter_CLI::upload_archive( array( $archive ), $assoc_args );
+		$progress->tick();
+
+		WP_CLI::success( "Upload successfully finished." );
 	}
 }
 
