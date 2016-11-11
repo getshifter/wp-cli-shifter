@@ -43,33 +43,7 @@ class WP_CLI_Shifter extends WP_CLI_Command
 	 */
 	function archive( $args, $assoc_args )
 	{
-		$tmp_dir = Shifter_CLI::tempdir( 'SFT' );
-
-		$excludes = Shifter_CLI::assoc_args_to_array( $assoc_args, "exclude" );
-
-		Shifter_CLI::rcopy( ABSPATH, $tmp_dir . '/webroot', $excludes );
-
-		WP_CLI::launch_self(
-			"db export",
-			array( $tmp_dir . "/wp.sql" ),
-			array(),
-			true,
-			true,
-			array( 'path' => WP_CLI::get_runner()->config['path'] )
-		);
-
-		if ( empty( $args[0] ) ) {
-			$archive = getcwd() . "/archive.zip";
-		} else {
-			$archive = $args[0];
-		}
-
-		$res = Shifter_CLI::zip( $tmp_dir, $archive );
-		Shifter_CLI::rrmdir( $tmp_dir );
-		if ( is_wp_error( $res ) ) {
-			WP_CLI::error( $res->get_error_message() );
-		}
-
+		$res = Shifter_CLI::create_archive( $args, $assoc_args );
 		WP_CLI::success( sprintf( "Archived to '%s'.", $res ) );
 	}
 
@@ -104,27 +78,35 @@ class WP_CLI_Shifter extends WP_CLI_Command
 	 */
 	function extract( $args, $assoc_args )
 	{
+		$progress = new \cli\progress\Bar( 'Creating an archive: ', 7 );
+
 		if ( ! is_file( $args[0] ) ) {
 			WP_CLI::error( "No such file or directory." );
 		}
+		$progress->tick();
+
 		$tmp_dir = Shifter_CLI::tempdir( 'SFT' );
 		$res = Shifter_CLI::unzip( $args[0], $tmp_dir );
 		if ( is_wp_error( $res ) ) {
 			WP_CLI::error( $res->get_error_message() );
 		}
+		$progress->tick();
 
 		if ( ! is_dir( $tmp_dir . '/webroot' ) || ! is_file( $tmp_dir . '/wp.sql' ) ) {
 			Shifter_CLI::rrmdir( $tmp_dir );
 			WP_CLI::error( sprintf( "Can't extract from '%s'.", $args[0] ) );
 		}
+		$progress->tick();
 
 		$excludes = Shifter_CLI::assoc_args_to_array( $assoc_args, "exclude" );
 
 		if ( ! empty( $assoc_args['delete'] ) ) {
 			Shifter_CLI::rempty( ABSPATH, $excludes );
 		}
+		$progress->tick();
 
 		Shifter_CLI::rcopy( $tmp_dir . '/webroot', ABSPATH, $excludes );
+		$progress->tick();
 
 		if ( is_file( $tmp_dir . "/wp.sql" ) ) {
 			$result = WP_CLI::launch_self(
@@ -140,8 +122,11 @@ class WP_CLI_Shifter extends WP_CLI_Command
 				WP_CLI::error( sprintf( "Can't import database from '%s'.", $args[0] ) );
 			}
 		}
+		$progress->tick();
 
 		Shifter_CLI::rrmdir( $tmp_dir );
+		$progress->tick();
+
 		WP_CLI::success( sprintf( "Extracted from '%s'.", $args[0] ) );
 	}
 }

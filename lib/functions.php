@@ -1,7 +1,84 @@
 <?php
 
+require dirname( __FILE__ ) . '/../lib/aws.phar';
+
+use Aws\CognitoIdentityProvider\CognitoIdentityProviderClient;
+
 class Shifter_CLI
 {
+	/**
+	 * Plompt login with user and password with prompt.
+	 *
+	 * @return bool or WP_CLI::Error()
+	 */
+	public static function prompt_user_and_pass()
+	{
+		$region = 'us-east-1';
+
+		$user = trim( cli\prompt(
+			'Shifter Username',
+			$default = false,
+			$marker = ': ',
+			$hide = false
+		) );
+
+		$pass = trim( cli\prompt(
+			'Password (will be hidden)',
+			$default = false,
+			$marker = ': ',
+			$hide = true
+		) );
+
+		return array( 'user' => $user, 'pass' => $pass );
+	}
+
+	/**
+	 * Create an archive.
+	 *
+	 * @param  array $args The `$args` for the WP-CLI.
+	 * @param  array $assoc_args The `$assoc_args` for the WP-CLI.
+	 * @return string The path to archive.
+	 */
+	public static function create_archive( $args, $assoc_args )
+	{
+		$progress = new \cli\progress\Bar( 'Creating an archive: ', 5 );
+
+		$tmp_dir = self::tempdir( 'SFT' );
+		$progress->tick();
+
+		$excludes = self::assoc_args_to_array( $assoc_args, "exclude" );
+
+		self::rcopy( ABSPATH, $tmp_dir . '/webroot', $excludes );
+		$progress->tick();
+
+		WP_CLI::launch_self(
+			"db export",
+			array( $tmp_dir . "/wp.sql" ),
+			array(),
+			true,
+			true,
+			array( 'path' => WP_CLI::get_runner()->config['path'] )
+		);
+		$progress->tick();
+
+		if ( empty( $args[0] ) ) {
+			$archive = getcwd() . "/archive.zip";
+		} else {
+			$archive = $args[0];
+		}
+
+		$file = self::zip( $tmp_dir, $archive );
+		$progress->tick();
+
+		self::rrmdir( $tmp_dir );
+		if ( is_wp_error( $file ) ) {
+			WP_CLI::error( $file->get_error_message() );
+		}
+		$progress->tick();
+
+		return $file;
+	}
+
 	/**
 	 * Remove a directory recursively.
 	 *
