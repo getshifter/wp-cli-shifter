@@ -78,7 +78,7 @@ class WP_CLI_Shifter extends WP_CLI_Command
 	 */
 	function extract( $args, $assoc_args )
 	{
-		$progress = new \cli\progress\Bar( 'Creating an archive: ', 7 );
+		$progress = new \cli\progress\Bar( 'Extracting an archive: ', 7 );
 
 		if ( ! is_file( $args[0] ) ) {
 			WP_CLI::error( "No such file or directory." );
