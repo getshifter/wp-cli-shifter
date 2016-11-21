@@ -25,6 +25,7 @@ class Shifter_CLI
 		);
 
 		if ( 200 === $res['response']['code'] ) {
+			return json_decode( $res['body'] );
 		} else {
 			$message = json_decode( $res['body'] )->message;
 			return new WP_Error( $res['response']['code'], $message );
@@ -38,8 +39,6 @@ class Shifter_CLI
 	 */
 	public static function prompt_user_and_pass()
 	{
-		$region = 'us-east-1';
-
 		$user = trim( cli\prompt(
 			'Shifter Username',
 			$default = false,

@@ -4,3 +4,4 @@ composer.phar
 .DS_Store
 installer
 npm-debug.log
+.envrc

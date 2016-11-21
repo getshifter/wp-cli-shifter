@@ -10,6 +10,10 @@ class SimpleMapTest extends WP_UnitTestCase
 		$res = Shifter_CLI::auth( "foo", "bar" );
 		$this->assertTrue( is_wp_error( $res ) );
 		$this->assertSame( "User does not exist.", $res->get_error_message() );
+
+		$res = Shifter_CLI::auth( getenv( "SHIFTER_USER" ), getenv( "SHIFTER_PASS" ) );
+		$this->assertTrue( ! is_wp_error( $res ) );
+		$this->assertTrue( !! $res->AccessToken );
 	}
 
 	/**

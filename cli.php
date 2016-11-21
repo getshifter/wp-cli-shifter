@@ -14,7 +14,59 @@ require_once( dirname( __FILE__ ) . "/lib/functions.php" );
  */
 class WP_CLI_Shifter extends WP_CLI_Command
 {
-	private $version = "v1.1.0";
+	private $version = "v1.2.0";
+
+	/**
+	 * Create a .zip archive as a archive for the Shifter.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [<file>]
+	 * : The name of the .zip file to archive. If omitted, it will be 'archive.zip'.
+	 *
+	 * [--exclude=<files>]
+	 * : Exclude specfic files from the archive.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *   # archive will be placed as `./archive.zip`.
+	 *   $ wp shifter archive
+	 *   Success: Archived to 'archive.zip'.
+	 *
+	 *   # You can specific file name of the archive.
+	 *   $ wp shifter archive /path/to/hello.zip
+	 *   Success: Archived to '/path/to/hello.zip'.
+	 *
+	 *   # You can use option `--exclude`.
+	 *   $ wp shifter archive --exclude=wp-config.php,wp-content/uploads/photo.jpg
+	 *   Success: Archived to '/path/to/hello.zip'.
+	 *
+	 * @subcommand upload
+	 */
+	function upload( $args, $assoc_args )
+	{
+		$token = "";
+
+		$user = Shifter_CLI::prompt_user_and_pass();
+		$result = Shifter_CLI::auth( $user['user'], $user['pass'] );
+		if ( is_wp_error( $result ) ) {
+			WP_CLI::error( $result->get_error_message() );
+		} else {
+			$token = $result->AccessToken;
+		}
+
+		var_dump($token);
+
+		WP_CLI::success( "Logged in as " . $user['user'] );
+
+		$file = Shifter_CLI::create_archive(
+			 array( Shifter_CLI::tempdir() . '/archive.zip' ),
+			 array()
+		);
+
+		var_dump( $file );
+		// WP_CLI::success( sprintf( "Archived to '%s'.", $res ) );
+	}
 
 	/**
 	 * Create a .zip archive as a archive for the Shifter.
