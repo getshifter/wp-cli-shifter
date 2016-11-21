@@ -5,6 +5,29 @@ class SimpleMapTest extends WP_UnitTestCase
 	/**
 	 * @test
 	 */
+	public function get_pre_signed_url()
+	{
+		$res = Shifter_CLI::auth( getenv( "SHIFTER_USER" ), getenv( "SHIFTER_PASS" ) );
+		$this->assertTrue( ! is_wp_error( $res ) );
+		$this->assertTrue( !! $res->AccessToken );
+
+		$url = Shifter_CLI::get_pre_signed_url( $res->AccessToken, __FILE__ );
+		$this->assertTrue( ! is_wp_error( $url ) );
+		$this->assertTrue( !! $url );
+	}
+
+	/**
+	 * @test
+	 */
+	public function get_uuid()
+	{
+		$uuid = Shifter_CLI::get_uuid( __FILE__ );
+		$this->assertTrue( !! preg_match( "/^([a-z0-9]{4}\-){7}([a-z0-9]{4})/", $uuid ) );
+	}
+
+	/**
+	 * @test
+	 */
 	public function auth()
 	{
 		$res = Shifter_CLI::auth( "foo", "bar" );

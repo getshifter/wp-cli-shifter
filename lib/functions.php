@@ -2,12 +2,33 @@
 
 class Shifter_CLI
 {
+	public static function get_pre_signed_url( $token, $archive )
+	{
+		$api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/archives";
+
+		$args = array(
+			'headers' => array(
+				'Authorization' => $token
+			),
+		);
+
+		$uuid = self::get_uuid( $archive );
+		$result = wp_remote_get( $api . "?task=getPreSignedUrl&key=" . $uuid, $args );
+
+		if ( 200 === $result['response']['code'] ) {
+			return json_decode( $result['body'] )->url;
+		} else {
+			$message = json_decode( $result['body'] )->message;
+			return new WP_Error( $result['response']['code'], $message );
+		}
+	}
+
 	/**
 	 * Authentication at shifter
 	 */
 	public static function auth( $username, $password )
 	{
-		$res = wp_remote_post(
+		$result = wp_remote_post(
 			"https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/login",
 			array(
 				'method' => 'POST',
@@ -24,11 +45,11 @@ class Shifter_CLI
 			)
 		);
 
-		if ( 200 === $res['response']['code'] ) {
-			return json_decode( $res['body'] );
+		if ( 200 === $result['response']['code'] ) {
+			return json_decode( $result['body'] );
 		} else {
-			$message = json_decode( $res['body'] )->message;
-			return new WP_Error( $res['response']['code'], $message );
+			$message = json_decode( $result['body'] )->message;
+			return new WP_Error( $result['response']['code'], $message );
 		}
 	}
 
@@ -304,5 +325,17 @@ class Shifter_CLI
 		} else {
 			return array();
 		}
+	}
+
+	/**
+	 * Create a md5 hash from directory.
+	 *
+	 * @since  0.1.0
+	 * @param  strint $dir Path to the directory.
+	 * @return string      Hash of the files in the derectory.
+	 */
+	public static function get_uuid( $file )
+	{
+		return wordwrap( md5_file( $file ), 4, '-', true );
 	}
 }
