@@ -3,6 +3,16 @@
 class SimpleMapTest extends WP_UnitTestCase
 {
 	/**
+	 * @test
+	 */
+	public function auth()
+	{
+		$res = Shifter_CLI::auth( "foo", "bar" );
+		$this->assertTrue( is_wp_error( $res ) );
+		$this->assertSame( "User does not exist.", $res->get_error_message() );
+	}
+
+	/**
 	 * Tests for the `Shifter_CLI::rempty()`.
 	 *
 	 * @test

@@ -3,6 +3,35 @@
 class Shifter_CLI
 {
 	/**
+	 * Authentication at shifter
+	 */
+	public static function auth( $username, $password )
+	{
+		$res = wp_remote_post(
+			"https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/login",
+			array(
+				'method' => 'POST',
+				'timeout' => 45,
+				'redirection' => 5,
+				'httpversion' => '1.1',
+				'blocking' => true,
+				'headers' => array(),
+				'body' => json_encode( array(
+					"username" => $username,
+					"password" => $password
+				) ),
+				'cookies' => array(),
+			)
+		);
+
+		if ( 200 === $res['response']['code'] ) {
+		} else {
+			$message = json_decode( $res['body'] )->message;
+			return new WP_Error( $res['response']['code'], $message );
+		}
+	}
+
+	/**
 	 * Plompt login with user and password with prompt.
 	 *
 	 * @return bool or WP_CLI::Error()
