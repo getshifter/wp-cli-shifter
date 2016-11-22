@@ -52,27 +52,22 @@ class WP_CLI_Shifter extends WP_CLI_Command
 			WP_CLI::error( $signed_url->get_error_message() );
 		}
 
-		$file = fopen( $archive, 'r' );
-		$file_size = filesize( $archive );
-		$file_data = fread( $file, $file_size );
+		$ch = curl_init();
 
-		$result = wp_remote_request(
-			$signed_url,
-			array(
-				"method" => "put",
-				"headers" => array(
-					'Content-Type' => 'application/zip',
-				),
-				"body" => $file_data
-			)
-		);
+		curl_setopt( $ch, CURLOPT_URL, $signed_url );
+		curl_setopt( $ch, CURLOPT_PUT, 1 );
+		curl_setopt( $ch, CURLOPT_HTTPHEADER, array(
+			"Content-Type: application/zip",
+		) );
+		$fh_res = fopen( $archive, 'r' );
+		curl_setopt( $ch, CURLOPT_INFILE, $fh_res );
+		curl_setopt( $ch, CURLOPT_INFILESIZE, filesize( $archive ) );
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+		$result = curl_exec( $ch );
+		$info = curl_getinfo($ch);
+		fclose( $fh_res );
 
-		fclose( $file );
-		unlink( $archive );
-
-		if ( is_wp_error( $result ) ) {
-			WP_CLI::error( $result->get_error_message() );
-		} elseif ( 200 === $result['response']['code'] ) {
+		if ( 200 === $info['http_code'] ) {
 			WP_CLI::success( "🍺 Archive uploaded successfully." );
 		} else {
 			WP_CLI::error( "Sorry, something went wrong. We're working on getting this fixed as soon as we can." );
