@@ -63,6 +63,7 @@ class WP_CLI_Shifter extends WP_CLI_Command
 				"headers" => array(
 					'Content-Type'  => 'application/zip',
 				),
+				"body" => $file_data
 			)
 		);
 
