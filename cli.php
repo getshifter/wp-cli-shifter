@@ -40,14 +40,34 @@ class WP_CLI_Shifter extends WP_CLI_Command
 
 		WP_CLI::success( "Logged in as " . $user['user'] );
 
-		$file = Shifter_CLI::create_archive(
+		$archive = Shifter_CLI::create_archive(
 			 array( Shifter_CLI::tempdir() . '/archive.zip' ),
 			 array()
 		);
 
 		WP_CLI::success( "Created an archive." );
 
-		// Shifter_CLI::upload( $token, $file );
+		$signed_url = Shifter_CLI::get_pre_signed_url( $token, $archive );
+		if ( is_wp_error( $signed_url ) ) {
+			WP_CLI::error( $signed_url->get_error_message() );
+		}
+var_dump( $signed_url );
+		$file = fopen( $archive, 'r' );
+		$file_size = filesize( $archive );
+		$file_data = fread( $file, $file_size );
+
+		$result = wp_remote_request(
+			$signed_url,
+			array(
+				"method" => "put",
+				"headers" => array(
+					'content-type'  => 'application/zip',
+				),
+				"body" => $file_data
+			)
+		);
+
+		var_dump( $result );
 	}
 
 	/**

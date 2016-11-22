@@ -15,7 +15,9 @@ class Shifter_CLI
 		$uuid = self::get_uuid( $archive );
 		$result = wp_remote_get( $api . "?task=getPreSignedUrl&key=" . $uuid, $args );
 
-		if ( 200 === $result['response']['code'] ) {
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		} elseif ( 200 === $result['response']['code'] ) {
 			return json_decode( $result['body'] )->url;
 		} else {
 			$message = json_decode( $result['body'] )->message;
@@ -45,7 +47,9 @@ class Shifter_CLI
 			)
 		);
 
-		if ( 200 === $result['response']['code'] ) {
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		} elseif ( 200 === $result['response']['code'] ) {
 			return json_decode( $result['body'] );
 		} else {
 			$message = json_decode( $result['body'] )->message;
