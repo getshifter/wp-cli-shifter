@@ -61,7 +61,7 @@ class WP_CLI_Shifter extends WP_CLI_Command
 			array(
 				"method" => "put",
 				"headers" => array(
-					'Content-Type'  => 'application/zip',
+					'Content-Type' => 'application/zip',
 				),
 				"body" => $file_data
 			)
@@ -69,7 +69,6 @@ class WP_CLI_Shifter extends WP_CLI_Command
 
 		fclose( $file );
 		unlink( $archive );
-		var_dump( $signed_url );
 
 		if ( is_wp_error( $result ) ) {
 			WP_CLI::error( $result->get_error_message() );

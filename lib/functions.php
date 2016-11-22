@@ -20,10 +20,12 @@ class Shifter_CLI
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		} elseif ( 200 === $result['response']['code'] ) {
-			return json_decode( $result['body'] )->url;
-		} else {
-			$message = json_decode( $result['body'] )->message;
-			return new WP_Error( $result['response']['code'], $message );
+			$res = json_decode( $result['body'] );
+			if ( ! empty( $res->url ) ) {
+				return $res->url;
+			} else {
+				return new WP_Error( "200", $res->errorMessage );
+			}
 		}
 	}
 
@@ -331,17 +333,5 @@ class Shifter_CLI
 		} else {
 			return array();
 		}
-	}
-
-	/**
-	 * Create a md5 hash from directory.
-	 *
-	 * @since  0.1.0
-	 * @param  strint $dir Path to the directory.
-	 * @return string      Hash of the files in the derectory.
-	 */
-	public static function get_uuid( $file )
-	{
-		return wordwrap( md5_file( $file ), 4, '-', true );
 	}
 }
