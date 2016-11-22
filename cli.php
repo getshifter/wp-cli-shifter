@@ -51,7 +51,7 @@ class WP_CLI_Shifter extends WP_CLI_Command
 		if ( is_wp_error( $signed_url ) ) {
 			WP_CLI::error( $signed_url->get_error_message() );
 		}
-var_dump( $signed_url );
+
 		$file = fopen( $archive, 'r' );
 		$file_size = filesize( $archive );
 		$file_data = fread( $file, $file_size );
@@ -61,13 +61,19 @@ var_dump( $signed_url );
 			array(
 				"method" => "put",
 				"headers" => array(
-					'content-type'  => 'application/zip',
+					'Content-Type'  => 'application/zip',
 				),
-				"body" => $file_data
 			)
 		);
 
-		var_dump( $result );
+		if ( is_wp_error( $result ) ) {
+			WP_CLI::error( "Sorry, something went wrong. We're working on getting this fixed as soon as we can." );
+		} elseif ( 200 === $result['response']['code'] ) {
+			WP_CLI::success( "🍺 Archive uploaded successfully." );
+		} else {
+			$message = json_decode( $result['body'] )->message;
+			WP_CLI::error( "Sorry, something went wrong. We're working on getting this fixed as soon as we can." );
+		}
 	}
 
 	/**
