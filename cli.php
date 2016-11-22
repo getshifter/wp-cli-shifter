@@ -69,9 +69,10 @@ class WP_CLI_Shifter extends WP_CLI_Command
 
 		fclose( $file );
 		unlink( $archive );
+		var_dump( $signed_url );
 
 		if ( is_wp_error( $result ) ) {
-			WP_CLI::error( "Sorry, something went wrong. We're working on getting this fixed as soon as we can." );
+			WP_CLI::error( $result->get_error_message() );
 		} elseif ( 200 === $result['response']['code'] ) {
 			WP_CLI::success( "🍺 Archive uploaded successfully." );
 		} else {

@@ -4,7 +4,7 @@ class Shifter_CLI
 {
 	public static function get_pre_signed_url( $token, $archive )
 	{
-		$api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/archives";
+		$api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/archives?task=integration";
 
 		$args = array(
 			'headers' => array(
@@ -12,8 +12,10 @@ class Shifter_CLI
 			),
 		);
 
-		$uuid = self::get_uuid( $archive );
-		$result = wp_remote_get( $api . "?task=getPreSignedUrl&key=" . $uuid, $args );
+		$result = wp_remote_post(
+			$api,
+			$args
+		);
 
 		if ( is_wp_error( $result ) ) {
 			return $result;
