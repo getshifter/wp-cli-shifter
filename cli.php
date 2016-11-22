@@ -67,12 +67,14 @@ class WP_CLI_Shifter extends WP_CLI_Command
 			)
 		);
 
+		fclose( $file );
+		unlink( $archive );
+
 		if ( is_wp_error( $result ) ) {
 			WP_CLI::error( "Sorry, something went wrong. We're working on getting this fixed as soon as we can." );
 		} elseif ( 200 === $result['response']['code'] ) {
 			WP_CLI::success( "🍺 Archive uploaded successfully." );
 		} else {
-			$message = json_decode( $result['body'] )->message;
 			WP_CLI::error( "Sorry, something went wrong. We're working on getting this fixed as soon as we can." );
 		}
 	}
