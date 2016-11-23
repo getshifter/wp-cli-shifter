@@ -2,6 +2,65 @@
 
 class Shifter_CLI
 {
+	public static function get_pre_signed_url( $token, $archive )
+	{
+		$api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/archives?task=integration";
+
+		$args = array(
+			'headers' => array(
+				'Authorization' => $token
+			),
+		);
+
+		$result = wp_remote_post(
+			$api,
+			$args
+		);
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		} elseif ( 200 === $result['response']['code'] ) {
+			$res = json_decode( $result['body'] );
+			if ( ! empty( $res->url ) ) {
+				return $res->url;
+			} else {
+				return new WP_Error( "200", $res->errorMessage );
+			}
+		}
+	}
+
+	/**
+	 * Authentication at shifter
+	 */
+	public static function auth( $username, $password )
+	{
+		$result = wp_remote_post(
+			"https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/login",
+			array(
+				'method' => 'POST',
+				'timeout' => 45,
+				'redirection' => 5,
+				'httpversion' => '1.1',
+				'blocking' => true,
+				'headers' => array(),
+				'body' => json_encode( array(
+					"username" => $username,
+					"password" => $password
+				) ),
+				'cookies' => array(),
+			)
+		);
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		} elseif ( 200 === $result['response']['code'] ) {
+			return json_decode( $result['body'] );
+		} else {
+			$message = json_decode( $result['body'] )->message;
+			return new WP_Error( $result['response']['code'], $message );
+		}
+	}
+
 	/**
 	 * Plompt login with user and password with prompt.
 	 *
@@ -9,8 +68,6 @@ class Shifter_CLI
 	 */
 	public static function prompt_user_and_pass()
 	{
-		$region = 'us-east-1';
-
 		$user = trim( cli\prompt(
 			'Shifter Username',
 			$default = false,

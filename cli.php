@@ -14,6 +14,66 @@ require_once( dirname( __FILE__ ) . "/lib/functions.php" );
  */
 class WP_CLI_Shifter extends WP_CLI_Command
 {
+	private $version = "v1.2.0";
+
+	/**
+	 * Upload a archive to the Shifter.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *   $ wp shifter upload
+	 *   Success: Archived to 'archive.zip'.
+	 *
+	 * @subcommand upload
+	 */
+	function upload( $args, $assoc_args )
+	{
+		$token = "";
+
+		$user = Shifter_CLI::prompt_user_and_pass();
+		$result = Shifter_CLI::auth( $user['user'], $user['pass'] );
+		if ( is_wp_error( $result ) ) {
+			WP_CLI::error( $result->get_error_message() );
+		} else {
+			$token = $result->AccessToken;
+		}
+
+		WP_CLI::success( "Logged in as " . $user['user'] );
+
+		$archive = Shifter_CLI::create_archive(
+			 array( Shifter_CLI::tempdir() . '/archive.zip' ),
+			 array()
+		);
+
+		WP_CLI::success( "Created an archive." );
+
+		$signed_url = Shifter_CLI::get_pre_signed_url( $token, $archive );
+		if ( is_wp_error( $signed_url ) ) {
+			WP_CLI::error( $signed_url->get_error_message() );
+		}
+
+		$ch = curl_init();
+
+		curl_setopt( $ch, CURLOPT_URL, $signed_url );
+		curl_setopt( $ch, CURLOPT_PUT, 1 );
+		curl_setopt( $ch, CURLOPT_HTTPHEADER, array(
+			"Content-Type: application/zip",
+		) );
+		$fh_res = fopen( $archive, 'r' );
+		curl_setopt( $ch, CURLOPT_INFILE, $fh_res );
+		curl_setopt( $ch, CURLOPT_INFILESIZE, filesize( $archive ) );
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+		$result = curl_exec( $ch );
+		$info = curl_getinfo($ch);
+		fclose( $fh_res );
+
+		if ( 200 === $info['http_code'] ) {
+			WP_CLI::success( "🍺 Archive uploaded successfully." );
+		} else {
+			WP_CLI::error( "Sorry, something went wrong. We're working on getting this fixed as soon as we can." );
+		}
+	}
+
 	/**
 	 * Create a .zip archive as a archive for the Shifter.
 	 *
@@ -128,6 +188,16 @@ class WP_CLI_Shifter extends WP_CLI_Command
 		$progress->tick();
 
 		WP_CLI::success( sprintf( "Extracted from '%s'.", $args[0] ) );
+	}
+
+	/**
+	 * Prints current version of the shifter/cli.
+	 *
+	 * @when before_wp_load
+	 */
+	public function version()
+	{
+		WP_CLI::line( $this->version );
 	}
 }
 

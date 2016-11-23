@@ -11,3 +11,4 @@ utils
 phpunit.xml
 .editorconfig
 .travis.yml
+.envrc
