@@ -17,12 +17,16 @@ class WP_CLI_Shifter extends WP_CLI_Command
 	private $version = "v1.2.0";
 
 	/**
-	 * Upload a archive to the Shifter.
+	 * Upload an archive to the Shifter.
 	 *
 	 * ## EXAMPLES
 	 *
 	 *   $ wp shifter upload
-	 *   Success: Archived to 'archive.zip'.
+	 *   Shifter Username: jack
+	 *   Password (will be hidden):
+	 *   Success: Logged in as jack
+	 *   Creating an archive:   100% [=======================] 0:23 / 0:04Success: Created an archive.
+	 *   Success: 🍺 Archive uploaded successfully.
 	 *
 	 * @subcommand upload
 	 */

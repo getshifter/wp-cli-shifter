@@ -245,14 +245,14 @@ class Shifter_CLI
 		}
 
 		if ( ! extension_loaded( 'zip' ) || ! file_exists( $src ) ) {
-			return false;
+			return new WP_Error( "error", "PHP Zip extension is not installed. Please install it." );
 		}
 
 		$destination = realpath( dirname( $destination ) ) . "/" . basename( $destination );
 
 		$zip = new ZipArchive();
 		if ( ! $zip->open( $destination, ZIPARCHIVE::CREATE ) ) {
-			return new WP_Error( "", "No such file or directory." );
+			return new WP_Error( "error", "No such file or directory." );
 		}
 
 		$iterator = self::get_files( $src );
