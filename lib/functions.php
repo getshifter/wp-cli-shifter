@@ -26,6 +26,8 @@ class Shifter_CLI
 			} else {
 				return new WP_Error( "200", $res->errorMessage );
 			}
+		} else {
+			return new WP_Error( $result['response']['code'], "Incorrect token." );
 		}
 	}
 
@@ -94,7 +96,7 @@ class Shifter_CLI
 	 */
 	public static function create_archive( $args, $assoc_args )
 	{
-		$progress = new \cli\progress\Bar( 'Creating an archive: ', 5 );
+		$progress = WP_CLI\Utils\make_progress_bar( 'Creating an archive: ', 5 );
 
 		$tmp_dir = self::tempdir( 'SFT' );
 		$progress->tick();

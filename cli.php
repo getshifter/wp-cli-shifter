@@ -213,4 +213,4 @@ class WP_CLI_Shifter extends WP_CLI_Command
 	}
 }
 
-WP_CLI::add_command( 'shifter', 'WP_CLI_Shifter'  );
+WP_CLI::add_command( 'shifter', 'WP_CLI_Shifter' );
