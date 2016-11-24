@@ -2,7 +2,7 @@
 
 class Shifter_CLI
 {
-	public static function get_pre_signed_url( $token, $archive )
+	public static function get_pre_signed_url( $token )
 	{
 		$api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/archives?task=integration";
 

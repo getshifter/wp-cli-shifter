@@ -19,6 +19,11 @@ class WP_CLI_Shifter extends WP_CLI_Command
 	/**
 	 * Upload an archive to the Shifter.
 	 *
+	 * ## OPTIONS
+	 *
+	 * [--token=<token>]
+	 * : The access token to communinate with the Shifter API.
+	 *
 	 * ## EXAMPLES
 	 *
 	 *   $ wp shifter upload
@@ -34,15 +39,23 @@ class WP_CLI_Shifter extends WP_CLI_Command
 	{
 		$token = "";
 
-		$user = Shifter_CLI::prompt_user_and_pass();
-		$result = Shifter_CLI::auth( $user['user'], $user['pass'] );
-		if ( is_wp_error( $result ) ) {
-			WP_CLI::error( $result->get_error_message() );
+		if ( ! empty( $assoc_args['token'] ) ) {
+			$token = $assoc_args['token'];
 		} else {
-			$token = $result->AccessToken;
+			$user = Shifter_CLI::prompt_user_and_pass();
+			$result = Shifter_CLI::auth( $user['user'], $user['pass'] );
+			if ( is_wp_error( $result ) ) {
+				WP_CLI::error( $result->get_error_message() );
+			} else {
+				$token = $result->AccessToken;
+			}
+			WP_CLI::success( "Logged in as " . $user['user'] );
 		}
 
-		WP_CLI::success( "Logged in as " . $user['user'] );
+		$signed_url = Shifter_CLI::get_pre_signed_url( $token );
+		if ( is_wp_error( $signed_url ) ) {
+			WP_CLI::error( $signed_url->get_error_message() );
+		}
 
 		$archive = Shifter_CLI::create_archive(
 			 array( Shifter_CLI::tempdir() . '/archive.zip' ),
@@ -50,11 +63,6 @@ class WP_CLI_Shifter extends WP_CLI_Command
 		);
 
 		WP_CLI::success( "Created an archive." );
-
-		$signed_url = Shifter_CLI::get_pre_signed_url( $token, $archive );
-		if ( is_wp_error( $signed_url ) ) {
-			WP_CLI::error( $signed_url->get_error_message() );
-		}
 
 		$ch = curl_init();
 
