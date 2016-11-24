@@ -14,6 +14,20 @@ https://getshifter.io/
 
 ## Subcommands
 
+### Upload an archive to the Shifter.
+
+`wp shifter upload` will deploy your WordPress site to the Shifter.
+
+```
+$ wp shifter upload
+Shifter Username: jack
+Password (will be hidden):
+Success: Logged in as jack
+Creating an archive:   100% [=======================] 0:23 / 0:04Success: Created an
+archive.
+Success: 🍺 Archive uploaded successfully.
+```
+
 ### Backup your WordPress files and database.
 
 ```bash
@@ -42,6 +56,31 @@ You can exclude specific files from archive.
 
 ```bash
 $ wp shifter extract /path/to/archive.zip --exclude=wp-config.php
+```
+
+### Help
+
+```bash
+$ wp help shifter
+
+NAME
+
+  wp shifter
+
+DESCRIPTION
+
+  WP-CLI commands for the Shifter.
+
+SYNOPSIS
+
+  wp shifter <command>
+
+SUBCOMMANDS
+
+  archive      Create a .zip archive as a archive for the Shifter.
+  extract      Extract the WordPress site from a .zip archive.
+  upload       Upload an archive to the Shifter.
+  version      Prints current version of the shifter/cli.
 ```
 
 ## Installing via package command
