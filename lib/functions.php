@@ -96,15 +96,21 @@ class Shifter_CLI
 	 */
 	public static function create_archive( $args, $assoc_args )
 	{
-		$progress = WP_CLI\Utils\make_progress_bar( 'Creating an archive: ', 5 );
+		if ( ! WP_CLI::get_config( 'quiet' ) ) {
+			$progress = WP_CLI\Utils\make_progress_bar( 'Extracting an archive: ', 7 );
+		}
 
 		$tmp_dir = self::tempdir( 'SFT' );
-		$progress->tick();
+		if ( ! WP_CLI::get_config( 'quiet' ) ) {
+			$progress->tick();
+		}
 
 		$excludes = self::assoc_args_to_array( $assoc_args, "exclude" );
 
 		self::rcopy( ABSPATH, $tmp_dir . '/webroot', $excludes );
-		$progress->tick();
+		if ( ! WP_CLI::get_config( 'quiet' ) ) {
+			$progress->tick();
+		}
 
 		WP_CLI::launch_self(
 			"db export",
@@ -114,7 +120,9 @@ class Shifter_CLI
 			true,
 			array( 'path' => WP_CLI::get_runner()->config['path'] )
 		);
-		$progress->tick();
+		if ( ! WP_CLI::get_config( 'quiet' ) ) {
+			$progress->tick();
+		}
 
 		if ( empty( $args[0] ) ) {
 			$archive = getcwd() . "/archive.zip";
@@ -123,13 +131,17 @@ class Shifter_CLI
 		}
 
 		$file = self::zip( $tmp_dir, $archive );
-		$progress->tick();
+		if ( ! WP_CLI::get_config( 'quiet' ) ) {
+			$progress->tick();
+		}
 
 		self::rrmdir( $tmp_dir );
 		if ( is_wp_error( $file ) ) {
 			WP_CLI::error( $file->get_error_message() );
 		}
-		$progress->tick();
+		if ( ! WP_CLI::get_config( 'quiet' ) ) {
+			$progress->tick();
+		}
 
 		return $file;
 	}
