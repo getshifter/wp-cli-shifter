@@ -6,11 +6,17 @@ The Shifter is a serverless hosting solution for WordPress.
 
 https://getshifter.io/
 
-`wp shifter` is a WP-CLI command that enables you to import/export your WordPress site for the Shifter.
+`wp shifter` is a WP-CLI command that enables you to deploy/import/export your WordPress site for the Shifter.
 
 ## Requires
 
 * WP-CLI 0.23 or later
+
+## Getting Started
+
+```bash
+$ wp package install shifter/cli:@stable
+```
 
 ## Subcommands
 
@@ -81,12 +87,6 @@ SUBCOMMANDS
   extract      Extract the WordPress site from a .zip archive.
   upload       Upload an archive to the Shifter.
   version      Prints current version of the shifter/cli.
-```
-
-## Installing via package command
-
-```bash
-$ wp package install shifter/cli:@stable
 ```
 
 ## Installing manually
