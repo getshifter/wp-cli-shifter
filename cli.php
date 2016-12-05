@@ -24,6 +24,12 @@ class WP_CLI_Shifter extends WP_CLI_Command
 	 * [--token=<token>]
 	 * : The access token to communinate with the Shifter API.
 	 *
+	 * [--shifter-user=<username>]
+	 * : The username for the Shifter.
+	 *
+	 * [--shifter-password=<password>]
+	 * : The password for the Shifter.
+	 *
 	 * ## EXAMPLES
 	 *
 	 *   $ wp shifter upload
@@ -42,14 +48,21 @@ class WP_CLI_Shifter extends WP_CLI_Command
 		if ( ! empty( $assoc_args['token'] ) ) {
 			$token = $assoc_args['token'];
 		} else {
-			$user = Shifter_CLI::prompt_user_and_pass();
-			$result = Shifter_CLI::auth( $user['user'], $user['pass'] );
+			if ( ! empty( $assoc_args['shifter-user'] ) && ! empty( $assoc_args['shifter-password'] ) ) {
+				$username = $assoc_args['shifter-user'];
+				$password = $assoc_args['shifter-password'];
+			} else {
+				$user = Shifter_CLI::prompt_user_and_pass();
+				$username = $user['user'];
+				$password = $user['pass'];
+			}
+			$result = Shifter_CLI::auth( $username, $password );
 			if ( is_wp_error( $result ) ) {
 				WP_CLI::error( $result->get_error_message() );
 			} else {
 				$token = $result->AccessToken;
 			}
-			WP_CLI::success( "Logged in as " . $user['user'] );
+			WP_CLI::success( "Logged in as " . $username );
 		}
 
 		$signed_url = Shifter_CLI::get_pre_signed_url( $token );
