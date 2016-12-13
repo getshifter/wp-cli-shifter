@@ -97,7 +97,7 @@ class Shifter_CLI
 	public static function create_archive( $args, $assoc_args )
 	{
 		if ( ! WP_CLI::get_config( 'quiet' ) ) {
-			$progress = WP_CLI\Utils\make_progress_bar( 'Extracting an archive: ', 5 );
+			$progress = WP_CLI\Utils\make_progress_bar( 'Archiving an archive: ', 5 );
 		}
 
 		$tmp_dir = self::tempdir( 'SFT' );
