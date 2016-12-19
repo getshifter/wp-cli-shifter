@@ -14,12 +14,47 @@ require_once( dirname( __FILE__ ) . "/lib/functions.php" );
  */
 class WP_CLI_Shifter extends WP_CLI_Command
 {
-	private $version = "v1.2.0";
+	private $version = "v1.3.0";
+
+	/**
+	 * Get the list of archives from the Shifter.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <file>
+	 * : The *.zip archive to upload.
+	 *
+	 * [--token=<token>]
+	 * : The access token to communinate with the Shifter API.
+	 *
+	 * [--shifter-user=<username>]
+	 * : The username for the Shifter.
+	 *
+	 * [--shifter-password=<password>]
+	 * : The password for the Shifter.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *   $ wp shifter upload
+	 *   Shifter Username: jack
+	 *   Password (will be hidden):
+	 *   Success: Logged in as jack
+	 *   Creating an archive:   100% [=======================] 0:23 / 0:04Success: Created an archive.
+	 *   Success: 🍺 Archive uploaded successfully.
+	 *
+	 * @subcommand list
+	 */
+	public function _list()
+	{
+	}
 
 	/**
 	 * Upload an archive to the Shifter.
 	 *
 	 * ## OPTIONS
+	 *
+	 * <file>
+	 * : The *.zip archive to upload.
 	 *
 	 * [--token=<token>]
 	 * : The access token to communinate with the Shifter API.
@@ -70,12 +105,7 @@ class WP_CLI_Shifter extends WP_CLI_Command
 			WP_CLI::error( $signed_url->get_error_message() );
 		}
 
-		$archive = Shifter_CLI::create_archive(
-			 array( Shifter_CLI::tempdir() . '/archive.zip' ),
-			 $assoc_args
-		);
-
-		WP_CLI::success( "Created an archive." );
+		$archive = $args[0];
 
 		$ch = curl_init();
 
