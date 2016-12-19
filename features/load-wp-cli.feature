@@ -1,6 +1,6 @@
-Feature: Test that `wp shifter` commands loads.
+Feature: Test that `wp shifter archive` commands loads.
 
-  Scenario: `wp shifter` commands should be available.
+  Scenario: `wp shifter archive` commands should be available.
     Given a WP install
 
     When I run `wp help shifter`
@@ -9,13 +9,13 @@ Feature: Test that `wp shifter` commands loads.
     When I run `wp help shifter archive`
     Then the return code should be 0
 
-    When I run `wp help shifter extract`
+    When I run `wp help shifter archive extract`
     Then the return code should be 0
 
-  Scenario: Tests for `wp shifter archive`.
+  Scenario: Tests for `wp shifter archive create`.
     Given a WP install
 
-    When I run `wp shifter archive`
+    When I run `wp shifter archive create`
     Then STDOUT should contain:
       """
       Success: Archived to
@@ -26,7 +26,7 @@ Feature: Test that `wp shifter` commands loads.
       """
     And the archive.zip file should exist
 
-    When I run `wp shifter archive ./hello.zip`
+    When I run `wp shifter archive create ./hello.zip`
     Then STDOUT should contain:
       """
       Success: Archived to
@@ -37,7 +37,7 @@ Feature: Test that `wp shifter` commands loads.
       """
     And the hello.zip file should exist
 
-    When I run `wp shifter archive /tmp/archive.zip`
+    When I run `wp shifter archive create /tmp/archive.zip`
     Then STDOUT should contain:
       """
       Success: Archived to
@@ -48,38 +48,38 @@ Feature: Test that `wp shifter` commands loads.
       """
     And the /tmp/archive.zip file should exist
 
-    When I try `wp shifter archive foo/bar/hello.zip`
+    When I try `wp shifter archive create foo/bar/hello.zip`
     Then the return code should be 1
     Then STDERR should contain:
       """
       Error: No such file or directory.
       """
 
-  Scenario: Tests for the `wp shifter extract`
+  Scenario: Tests for the `wp shifter archive extract`
     Given a WP install
     And a wp-content/plugins/example.php file:
       """
       // Plugin Name: Example Plugin
       // Network: true
       """
-    And I run `wp shifter archive /tmp/archive.zip`
+    And I run `wp shifter archive create /tmp/archive.zip`
     And I run `wp plugin uninstall example`
 
-    When I try `wp shifter extract foo/bar/hello.zip`
+    When I try `wp shifter archive extract foo/bar/hello.zip`
     Then the return code should be 1
     Then STDERR should contain:
       """
       Error: No such file or directory.
       """
 
-    When I run `wp shifter extract /tmp/archive.zip --exclude=wp-content/plugins/example.php --delete`
+    When I run `wp shifter archive extract /tmp/archive.zip --exclude=wp-content/plugins/example.php --delete`
     Then STDOUT should contain:
       """
       Success: Extracted from '/tmp/archive.zip'.
       """
     And the wp-content/plugins/example.php file should not exist
 
-    When I run `wp shifter extract /tmp/archive.zip`
+    When I run `wp shifter archive extract /tmp/archive.zip`
     Then STDOUT should contain:
       """
       Success: Extracted from '/tmp/archive.zip'.
@@ -92,7 +92,7 @@ Feature: Test that `wp shifter` commands loads.
   Scenario: Upload an archive
     Given a WP install
 
-    When I run `wp shifter archive`
+    When I run `wp shifter archive create`
     Then STDOUT should contain:
       """
       Success: Archived to
@@ -103,17 +103,17 @@ Feature: Test that `wp shifter` commands loads.
       """
     And the archive.zip file should exist
 
-    When I run `wp shifter upload archive.zip --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS`
+    When I run `wp shifter archive upload archive.zip --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS`
     Then STDOUT should contain:
       """
       Success: 🍺 Archive uploaded successfully.
       """
 
-    When I run `wp shifter list --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS`
+    When I run `wp shifter archive list --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS`
     Then STDOUT should be a table containing rows:
       | archive_id | archive_owner | archive_create_date |
 
-    When I run `wp shifter delete $(wp shifter list --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS --format=json | jq -r .[0].archive_id) --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS`
+    When I run `wp shifter archive delete $(wp shifter archive list --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS --format=json | jq -r .[0].archive_id) --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS`
     Then STDOUT should contain:
       """
       Success: 🍺 Archive deleted successfully.
