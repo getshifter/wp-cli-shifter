@@ -14,7 +14,7 @@ require_once( dirname( __FILE__ ) . "/lib/functions.php" );
  */
 class WP_CLI_Shifter extends WP_CLI_Command
 {
-	private $version = "v1.3.0";
+	private $version = "v1.4.0";
 
 	/**
 	 * Delete an archive from the Shifter.
@@ -76,6 +76,26 @@ class WP_CLI_Shifter extends WP_CLI_Command
 	 *
 	 * [--format=<format>]
 	 * : Accepted values: table, csv, json, count. Default: table
+	 *
+	 * ## EXAMPLES
+	 *
+	 *   $ wp shifter list
+	 *   Shifter Username: jack
+	 *   Password (will be hidden):
+	 *   +---------------------+---------------+---------------------------+
+	 *   | archive_id          | archive_owner | archive_create_date       |
+	 *   +---------------------+---------------+---------------------------+
+	 *   | xxxx-xxxx-xxxx-xxxx | jack          | 2016-12-19T05:30:40+00:00 |
+	 *   +---------------------+---------------+---------------------------+
+	 *
+	 *   $ wp shifter list --shifter-user=jack --shifter-password=xxxx --format=json | jq .
+	 *   [
+	 *     {
+	 *       "archive_id": "xxxx-xxxx-xxxx-xxxx",
+	 *       "archive_owner": "jack",
+	 *       "archive_create_date": "2016-12-19T05:30:40+00:00"
+	 *     }
+	 *   ]
 	 *
 	 * @subcommand list
 	 */

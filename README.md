@@ -22,17 +22,12 @@ $ wp package install shifter/cli:@stable
 
 ### Upload an archive to the Shifter.
 
-`wp shifter upload` will deploy your WordPress site to the Shifter.
-
-```
-$ wp shifter upload
-Shifter Username: jack
-Password (will be hidden):
-Success: Logged in as jack
-Creating an archive:   100% [=======================] 0:23 / 0:04Success: Created an
-archive.
-Success: 🍺 Archive uploaded successfully.
-```
+* `archive` - Create a .zip archive as a archive for the Shifter.
+* `delete` - Delete an archive from the Shifter.
+* `extract` - Extract the WordPress site from a .zip archive.
+* `list` - Get a list of archives from the Shifter.
+* `upload` - Upload an archive to the Shifter.
+* `version` - Prints current version of the shifter/cli.
 
 ### Backup your WordPress files and database.
 
@@ -84,7 +79,9 @@ SYNOPSIS
 SUBCOMMANDS
 
   archive      Create a .zip archive as a archive for the Shifter.
+  delete       Delete an archive from the Shifter.
   extract      Extract the WordPress site from a .zip archive.
+  list         Get a list of archives from the Shifter.
   upload       Upload an archive to the Shifter.
   version      Prints current version of the shifter/cli.
 ```
@@ -101,4 +98,10 @@ Add following into your `~/.wp-cli/config.yml`.
 ```yaml
 require:
   - commands/wp-cli-shifter/cli.php
+```
+
+## Upgrade
+
+```
+$ wp package update
 ```

@@ -112,3 +112,9 @@ Feature: Test that `wp shifter` commands loads.
     When I run `wp shifter list --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS`
     Then STDOUT should be a table containing rows:
       | archive_id | archive_owner | archive_create_date |
+
+    When I run `wp shifter delete $(wp shifter list --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS --format=json | jq -r .[0].archive_id) --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS`
+    Then STDOUT should contain:
+      """
+      Success: 🍺 Archive deleted successfully.
+      """
