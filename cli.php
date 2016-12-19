@@ -152,6 +152,9 @@ class WP_CLI_Shifter extends WP_CLI_Command
 		}
 
 		$archive = $args[0];
+		if ( ! is_file( $archive ) ) {
+			WP_CLI::error( $archive . " doesn't exist." );
+		}
 
 		$ch = curl_init();
 

@@ -178,7 +178,19 @@ class FeatureContext extends BehatContext implements ClosuredContextInterface {
 	}
 
 	public function replace_variables( $str ) {
-		return preg_replace_callback( '/\{([A-Z_]+)\}/', array( $this, '_replace_var' ), $str );
+		$str = preg_replace_callback( '/\{([A-Z_]+)\}/', array( $this, '_replace_var' ), $str );
+		$str = preg_replace_callback( '/\$([A-Z_]+)/', array( $this, '_replace_env_var' ), $str );
+		return $str;
+	}
+
+	private function _replace_env_var( $matches ) {
+		$cmd = $matches[0];
+
+		foreach ( array_slice( $matches, 1 ) as $key ) {
+			$cmd = str_replace( '$' . $key, "'" . getenv( $key ) . "'", $cmd );
+		}
+
+		return $cmd;
 	}
 
 	private function _replace_var( $matches ) {

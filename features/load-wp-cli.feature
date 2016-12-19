@@ -88,3 +88,27 @@ Feature: Test that `wp shifter` commands loads.
 
     When I run `wp core version`
     Then the return code should be 0
+
+  Scenario: Upload an archive
+    Given a WP install
+
+    When I run `wp shifter archive`
+    Then STDOUT should contain:
+      """
+      Success: Archived to
+      """
+    And STDOUT should contain:
+      """
+      archive.zip
+      """
+    And the archive.zip file should exist
+
+    When I run `wp shifter upload archive.zip --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS`
+    Then STDOUT should contain:
+      """
+      Success: 🍺 Archive uploaded successfully.
+      """
+
+    When I run `wp shifter list --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS`
+    Then STDOUT should be a table containing rows:
+      | archive_id | archive_owner | archive_create_date |
