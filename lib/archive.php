@@ -1,7 +1,7 @@
 <?php
 
 /**
- * WP-CLI commands for the Shifter.
+ * Manage archives for the Shifter.
  *
  * @subpackage commands/community
  * @maintainer Shifter Team

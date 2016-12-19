@@ -23,40 +23,40 @@ $ wp package install shifter/cli:@stable
 ### Upload an archive to the Shifter.
 
 * `archive` - Create a .zip archive as a archive for the Shifter.
-* `delete` - Delete an archive from the Shifter.
-* `extract` - Extract the WordPress site from a .zip archive.
-* `list` - Get a list of archives from the Shifter.
-* `upload` - Upload an archive to the Shifter.
+  * `delete` - Delete an archive from the Shifter.
+  * `extract` - Extract the WordPress site from a .zip archive.
+  * `list` - Get a list of archives from the Shifter.
+  * `upload` - Upload an archive to the Shifter.
 * `version` - Prints current version of the shifter/cli.
 
 ### Backup your WordPress files and database.
 
 ```bash
-$ wp shifter archive [<file>] [--exclude=<files>]
+$ wp shifter archive create [<file>] [--exclude=<files>]
 ```
 
 You can exclude `wp-config.php`.
 
 ```
-$ wp shifter archive /path/to/archive.zip --exclude=wp-config.php
+$ wp shifter archive create /path/to/archive.zip --exclude=wp-config.php
 ```
 
 ### Extract from backup.
 
 ```bash
-$ wp shifter extract <file> [--delete] [--exclude=<files>]
+$ wp shifter archive extract <file> [--delete] [--exclude=<files>]
 ```
 
 If you add `--delete` option, this command will remove all files before extracting.
 
 ```bash
-$ wp shifter extract /path/to/archive.zip --delete
+$ wp shifter archive extract /path/to/archive.zip --delete
 ```
 
 You can exclude specific files from archive.
 
 ```bash
-$ wp shifter extract /path/to/archive.zip --exclude=wp-config.php
+$ wp shifter archive extract /path/to/archive.zip --exclude=wp-config.php
 ```
 
 ### Help
@@ -79,10 +79,6 @@ SYNOPSIS
 SUBCOMMANDS
 
   archive      Create a .zip archive as a archive for the Shifter.
-  delete       Delete an archive from the Shifter.
-  extract      Extract the WordPress site from a .zip archive.
-  list         Get a list of archives from the Shifter.
-  upload       Upload an archive to the Shifter.
   version      Prints current version of the shifter/cli.
 ```
 
