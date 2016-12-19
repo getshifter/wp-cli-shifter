@@ -17,12 +17,12 @@ class WP_CLI_Shifter extends WP_CLI_Command
 	private $version = "v1.3.0";
 
 	/**
-	 * Get the list of archives from the Shifter.
+	 * Delete an archive from the Shifter.
 	 *
 	 * ## OPTIONS
 	 *
-	 * <file>
-	 * : The *.zip archive to upload.
+	 * <archive_id>
+	 * : The archive_id.
 	 *
 	 * [--token=<token>]
 	 * : The access token to communinate with the Shifter API.
@@ -33,19 +33,85 @@ class WP_CLI_Shifter extends WP_CLI_Command
 	 * [--shifter-password=<password>]
 	 * : The password for the Shifter.
 	 *
-	 * ## EXAMPLES
+	 * @subcommand delete
+	 */
+	public function delete( $args, $assoc_args )
+	{
+		$token = Shifter_CLI::get_access_token( $args, $assoc_args );
+
+		$ch = curl_init();
+		curl_setopt( $ch, CURLOPT_URL, Shifter_CLI::archive_api . '/' . $args[0] );
+		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, 'DELETE' );
+		curl_setopt( $ch, CURLOPT_HTTPHEADER, array(
+			"Authorization: " . $token,
+		) );
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+		$result = json_decode( curl_exec( $ch ) );
+		$info = curl_getinfo($ch);
+
+		if ( 200 === $info['http_code'] ) {
+			if ( empty( $result->errorMessage ) ) {
+				WP_CLI::success( "🍺 Archive deleted successfully." );
+			} else {
+				WP_CLI::error( $result->errorMessage );
+			}
+		} else {
+			WP_CLI::error( "Sorry, something went wrong. We're working on getting this fixed as soon as we can." );
+		}
+	}
+
+	/**
+	 * Get a list of archives from the Shifter.
 	 *
-	 *   $ wp shifter upload
-	 *   Shifter Username: jack
-	 *   Password (will be hidden):
-	 *   Success: Logged in as jack
-	 *   Creating an archive:   100% [=======================] 0:23 / 0:04Success: Created an archive.
-	 *   Success: 🍺 Archive uploaded successfully.
+	 * ## OPTIONS
+	 *
+	 * [--token=<token>]
+	 * : The access token to communinate with the Shifter API.
+	 *
+	 * [--shifter-user=<username>]
+	 * : The username for the Shifter.
+	 *
+	 * [--shifter-password=<password>]
+	 * : The password for the Shifter.
+	 *
+	 * [--format=<format>]
+	 * : Accepted values: table, csv, json, count. Default: table
 	 *
 	 * @subcommand list
 	 */
-	public function _list()
+	public function _list( $args, $assoc_args )
 	{
+		if ( isset( $assoc_args['format'] ) ) {
+			$format = $assoc_args['format'];
+		} else {
+			$format = 'table';
+		}
+
+		if ( ! in_array( $format, array( "table", "csv", "json" ) ) ) {
+			WP_CLI::error( 'Invalid format: ' . $assoc_args['format'] );
+		}
+
+		$token = Shifter_CLI::get_access_token( $args, $assoc_args );
+
+		$args = array(
+			'headers' => array(
+				'Authorization' => $token
+			),
+		);
+
+		$result = wp_remote_get(
+			Shifter_CLI::archive_api,
+			$args
+		);
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		} elseif ( 200 === $result['response']['code'] ) {
+			$archives = json_decode( $result['body'] );
+			WP_CLI\Utils\format_items( $format, $archives, array( 'archive_id', 'archive_owner', 'archive_create_date' ) );
+		} else {
+			return new WP_Error( $result['response']['code'], "Incorrect token." );
+		}
 	}
 
 	/**
@@ -78,27 +144,7 @@ class WP_CLI_Shifter extends WP_CLI_Command
 	 */
 	function upload( $args, $assoc_args )
 	{
-		$token = "";
-
-		if ( ! empty( $assoc_args['token'] ) ) {
-			$token = $assoc_args['token'];
-		} else {
-			if ( ! empty( $assoc_args['shifter-user'] ) && ! empty( $assoc_args['shifter-password'] ) ) {
-				$username = $assoc_args['shifter-user'];
-				$password = $assoc_args['shifter-password'];
-			} else {
-				$user = Shifter_CLI::prompt_user_and_pass();
-				$username = $user['user'];
-				$password = $user['pass'];
-			}
-			$result = Shifter_CLI::auth( $username, $password );
-			if ( is_wp_error( $result ) ) {
-				WP_CLI::error( $result->get_error_message() );
-			} else {
-				$token = $result->AccessToken;
-			}
-			WP_CLI::success( "Logged in as " . $username );
-		}
+		$token = Shifter_CLI::get_access_token( $args, $assoc_args );
 
 		$signed_url = Shifter_CLI::get_pre_signed_url( $token );
 		if ( is_wp_error( $signed_url ) ) {
