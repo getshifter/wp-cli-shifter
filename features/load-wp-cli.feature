@@ -118,3 +118,41 @@ Feature: Test that `wp shifter archive` commands loads.
       """
       Success: 🍺 Archive deleted successfully.
       """
+
+    When I run `wp shifter archive upload --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS`
+    Then STDOUT should contain:
+      """
+      Success: Created an archive.
+      """
+    And STDOUT should contain:
+      """
+      Success: 🍺 Archive uploaded successfully.
+      """
+
+    When I run `wp shifter archive delete $(wp shifter archive list --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS --format=json | jq -r .[0].archive_id) --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS`
+    Then STDOUT should contain:
+      """
+      Success: 🍺 Archive deleted successfully.
+      """
+
+    When I try `wp shifter archive delete xxxx --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS`
+    Then STDERR should contain:
+      """
+      Error: the archive does not exists
+      """
+
+  Scenario: Error test
+    Given a WP install
+
+    When I try `wp shifter archive delete xxxx --shifter-user=xxxx --shifter-password=xxxx`
+    Then STDERR should contain:
+      """
+      Error: User does not exist.
+      """
+
+    When I try `wp shifter archive upload --shifter-user=xxxx --shifter-password=xxxx`
+    Then STDERR should contain:
+      """
+      Error: User does not exist.
+      """
+

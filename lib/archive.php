@@ -8,7 +8,7 @@
  */
 class WP_CLI_Shifter_Archive extends WP_CLI_Command
 {
-	private $version = "v1.5.0";
+	private $version = "v1.5.1";
 
 	/**
 	 * Delete an archive from the Shifter.
@@ -133,7 +133,7 @@ class WP_CLI_Shifter_Archive extends WP_CLI_Command
 	 *
 	 * ## OPTIONS
 	 *
-	 * <file>
+	 * [<file>]
 	 * : The *.zip archive to upload.
 	 *
 	 * [--token=<token>]
@@ -165,9 +165,17 @@ class WP_CLI_Shifter_Archive extends WP_CLI_Command
 			WP_CLI::error( $signed_url->get_error_message() );
 		}
 
-		$archive = $args[0];
-		if ( ! is_file( $archive ) ) {
-			WP_CLI::error( $archive . " doesn't exist." );
+		if ( empty( $args[0] ) ) {
+			$archive = Shifter_CLI::create_archive(
+				array( Shifter_CLI::tempdir() . '/archive.zip' ),
+				$assoc_args
+			);
+			WP_CLI::success( "Created an archive." );
+		} else {
+			$archive = $args[0];
+			if ( ! is_file( $archive ) ) {
+				WP_CLI::error( $archive . " doesn't exist." );
+			}
 		}
 
 		$ch = curl_init();
