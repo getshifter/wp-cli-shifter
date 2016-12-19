@@ -2,9 +2,11 @@
 
 class Shifter_CLI
 {
+	const archive_api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/archives";
+
 	public static function get_pre_signed_url( $token )
 	{
-		$api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/archives?task=integration";
+		$api = self::archive_api . "?task=integration";
 
 		$args = array(
 			'headers' => array(
@@ -29,6 +31,32 @@ class Shifter_CLI
 		} else {
 			return new WP_Error( $result['response']['code'], "Incorrect token." );
 		}
+	}
+
+	public static function get_access_token( $args, $assoc_args )
+	{
+		$token = "";
+
+		if ( ! empty( $assoc_args['token'] ) ) {
+			$token = $assoc_args['token'];
+		} else {
+			if ( ! empty( $assoc_args['shifter-user'] ) && ! empty( $assoc_args['shifter-password'] ) ) {
+				$username = $assoc_args['shifter-user'];
+				$password = $assoc_args['shifter-password'];
+			} else {
+				$user = Shifter_CLI::prompt_user_and_pass();
+				$username = $user['user'];
+				$password = $user['pass'];
+			}
+			$result = Shifter_CLI::auth( $username, $password );
+			if ( is_wp_error( $result ) ) {
+				WP_CLI::error( $result->get_error_message() );
+			} else {
+				$token = $result->AccessToken;
+			}
+		}
+
+		return $token;
 	}
 
 	/**
@@ -97,7 +125,7 @@ class Shifter_CLI
 	public static function create_archive( $args, $assoc_args )
 	{
 		if ( ! WP_CLI::get_config( 'quiet' ) ) {
-			$progress = WP_CLI\Utils\make_progress_bar( 'Extracting an archive: ', 5 );
+			$progress = WP_CLI\Utils\make_progress_bar( 'Archiving an archive: ', 5 );
 		}
 
 		$tmp_dir = self::tempdir( 'SFT' );
