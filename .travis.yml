@@ -1,23 +1,20 @@
 sudo: false
-
 language: php
-
 notifications:
   email:
     on_success: never
     on_failure: change
-
 php:
-  - 5.5
-  - 5.6
-  - 7.0
-
+- 5.5
+- 5.6
+- 7.0
 cache:
-  - composer
-  - $HOME/.composer/cache
-
+- composer
+- "$HOME/.composer/cache"
 before_script:
-  - bash bin/install-wp-tests.sh wordpress_test root '' localhost latest
-  - WP_CLI_BIN_DIR=/tmp/wp-cli-phar bash bin/install-package-tests.sh
-
+- bash bin/install-wp-tests.sh wordpress_test root '' localhost latest
+- WP_CLI_BIN_DIR=/tmp/wp-cli-phar bash bin/install-package-tests.sh
 script: phpunit && WP_CLI_BIN_DIR=/tmp/wp-cli-phar ./vendor/bin/behat
+env:
+  global:
+    secure: lsc1BnLr/n9/wkySnj8RzsqREa01YU1EcvU0rs0MT/tIT8nE+kno5LNJFaCfHYLGMcAa/aMrvEbU/dRWaWH5ptB8jcOImyzhuDQ5w9fbcN66svlWOFWEg7gBruEfUcrVfT8zdv44DZjtBEHlevcVkYZNuxDpSLk3vCp6Bu7pthGuROv6TccbWdvR2N7fNzMRAZgL+l+XUCQEcn5QJXDWI9YNhrtGmZtpBIXmMK1d2207mVbmg4Cbm3RtNBHY/IfohdtSmwSz6u3tNZM5VWbaMGBn/qhTn3zvre8dI2Xzr/TqfsBTEV0rX5Rc5voG9Wb0y8EX525r2BK79QkX5+mhJmqlLHOZnU7QDFR141jpzZ3dOreMZ0bXDJD25Hcc2L7As1qVcAe5gpE7BLon1obWGBHX7SN1/6WzVLfLf7RYHxpihbYEQdkZ66YPRdilnRJNXyI45dXIit36CfP45q0h6E51/5Gn9qANPpHuBNAcG3X0tk/+2xqAQjuRbmhkzDuBMvxeyO9tLwXgjZJaUWqBC2gNECtQhwGCTXQGaqUXbZNnjsbPhPAfmDXxTyc6sRxi0l+zpxvXVi0HNQ8abOtUAV8K1ifIMLkk0TXURBAkS/AsIXKSYWDxy5/5AMQGxjmcJF1IX9o/0P/JQXQm4UduGs4ekBIlJLETWWFF6NmaMjE=
