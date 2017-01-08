@@ -250,9 +250,6 @@ class FeatureContext extends BehatContext implements ClosuredContextInterface {
 			$cwd = null;
 		}
 
-		$command = str_replace( '$SHIFTER_USER', getenv( 'SHIFTER_USER' ), $command );
-		$command = str_replace( '$SHIFTER_PASS', getenv( 'SHIFTER_PASS' ), $command );
-
 		return Process::create( $command, $cwd, $env );
 	}
 
