@@ -28,6 +28,7 @@ class WP_CLI_Shifter_Project extends WP_CLI_Command
 	 * : The password for the Shifter.
 	 *
 	 * @subcommand delete
+	 * @when before_wp_load
 	 */
 	public function delete( $args, $assoc_args )
 	{
@@ -79,17 +80,8 @@ class WP_CLI_Shifter_Project extends WP_CLI_Command
 	 *
 	 * ## EXAMPLES
 	 *
-	 *   # project will be placed as `./project.zip`.
-	 *   $ wp shifter project create
-	 *   Success: projectd to 'project.zip'.
-	 *
-	 *   # You can specific file name of the project.
-	 *   $ wp shifter project create /path/to/hello.zip
-	 *   Success: projectd to '/path/to/hello.zip'.
-	 *
-	 *   # You can use option `--exclude`.
-	 *   $ wp shifter project create --exclude=wp-config.php,wp-content/uploads/photo.jpg
-	 *   Success: projectd to '/path/to/hello.zip'.
+	 *   $ wp shifter project create --archive-id=xxxx --project-name="hello" ...
+	 *   Success: xxxx-xxxx-xxxx-xxxx
 	 *
 	 * @subcommand create
 	 * @when before_wp_load

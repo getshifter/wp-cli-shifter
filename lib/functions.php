@@ -9,28 +9,16 @@ class Shifter_CLI
 	{
 		$api = self::archive_api . "?task=integration";
 
-		$args = array(
-			'headers' => array(
-				'Authorization' => $token
-			),
-		);
+		$result = self::post( $api, array(), $token );
 
-		$result = wp_remote_post(
-			$api,
-			$args
-		);
-
-		if ( is_wp_error( $result ) ) {
-			return $result;
-		} elseif ( 200 === $result['response']['code'] ) {
-			$res = json_decode( $result['body'] );
-			if ( ! empty( $res->url ) ) {
-				return $res->url;
+		if ( 200 === $result['info']['http_code'] ) {
+			if ( ! empty( $result['body']['url'] ) ) {
+				return $result['body']['url'];
 			} else {
-				return new WP_Error( "200", $res->errorMessage );
+				WP_CLI::error( $result['body']['errorMessage'] );
 			}
 		} else {
-			return new WP_Error( $result['response']['code'], "Incorrect token." );
+			WP_CLI::error( $result['body']['message'] );
 		}
 	}
 
@@ -380,6 +368,29 @@ class Shifter_CLI
 			curl_setopt( $ch, CURLOPT_POSTFIELDS, http_build_query( $post ) );
 		} else {
 			curl_setopt( $ch, CURLOPT_POSTFIELDS, $post );
+		}
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+		$result = json_decode( curl_exec( $ch ), true );
+		$info = curl_getinfo($ch);
+
+		return array( 'info' => $info, 'body' => $result );
+	}
+
+	/**
+	 * Send http get to $url.
+	 *
+	 * @param stirng $url The URL.
+	 * @return array The HTTP response and body.
+	 */
+	public static function get( $url, $token = null )
+	{
+		$ch = curl_init();
+		curl_setopt( $ch, CURLOPT_URL, $url );
+		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, 'GET' );
+		if ( $token ) {
+			curl_setopt( $ch, CURLOPT_HTTPHEADER, array(
+				"Authorization: " . $token,
+			) );
 		}
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
 		$result = json_decode( curl_exec( $ch ), true );

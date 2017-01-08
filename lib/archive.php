@@ -28,6 +28,7 @@ class WP_CLI_Shifter_Archive extends WP_CLI_Command
 	 * : The password for the Shifter.
 	 *
 	 * @subcommand delete
+	 * @when before_wp_load
 	 */
 	public function delete( $args, $assoc_args )
 	{
@@ -92,6 +93,7 @@ class WP_CLI_Shifter_Archive extends WP_CLI_Command
 	 *   ]
 	 *
 	 * @subcommand list
+	 * @when before_wp_load
 	 */
 	public function _list( $args, $assoc_args )
 	{
@@ -113,18 +115,13 @@ class WP_CLI_Shifter_Archive extends WP_CLI_Command
 			),
 		);
 
-		$result = wp_remote_get(
-			Shifter_CLI::archive_api,
-			$args
-		);
+		$result = Shifter_CLI::get( Shifter_CLI::archive_api, $token );
 
-		if ( is_wp_error( $result ) ) {
-			return $result;
-		} elseif ( 200 === $result['response']['code'] ) {
-			$archives = json_decode( $result['body'] );
+		if ( 200 === $result['info']['http_code'] ) {
+			$archives = $result['body'];
 			WP_CLI\Utils\format_items( $format, $archives, array( 'archive_id', 'archive_owner', 'archive_create_date' ) );
 		} else {
-			return new WP_Error( $result['response']['code'], "Incorrect token." );
+			WP_CLI::error( "Incorrect token." );
 		}
 	}
 
@@ -161,9 +158,6 @@ class WP_CLI_Shifter_Archive extends WP_CLI_Command
 		$token = Shifter_CLI::get_access_token( $args, $assoc_args );
 
 		$signed_url = Shifter_CLI::get_pre_signed_url( $token );
-		if ( is_wp_error( $signed_url ) ) {
-			WP_CLI::error( $signed_url->get_error_message() );
-		}
 
 		if ( empty( $args[0] ) ) {
 			$archive = Shifter_CLI::create_archive(

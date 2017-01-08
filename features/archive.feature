@@ -1,17 +1,5 @@
 Feature: Test that `wp shifter archive` commands loads.
 
-  Scenario: `wp shifter archive` commands should be available.
-    Given a WP install
-
-    When I run `wp help shifter`
-    Then the return code should be 0
-
-    When I run `wp help shifter archive`
-    Then the return code should be 0
-
-    When I run `wp help shifter archive extract`
-    Then the return code should be 0
-
   Scenario: Tests for `wp shifter archive create`.
     Given a WP install
 
@@ -109,6 +97,9 @@ Feature: Test that `wp shifter archive` commands loads.
       Success: 🍺 Archive uploaded successfully.
       """
 
+  Scenario: List archives
+    Given an empty directory
+
     When I run `wp shifter archive list --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS`
     Then STDOUT should be a table containing rows:
       | archive_id | archive_owner | archive_create_date |
@@ -117,28 +108,6 @@ Feature: Test that `wp shifter archive` commands loads.
     Then STDOUT should contain:
       """
       Success: 🍺 Archive deleted successfully.
-      """
-
-    When I run `wp shifter archive upload --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS`
-    Then STDOUT should contain:
-      """
-      Success: Created an archive.
-      """
-    And STDOUT should contain:
-      """
-      Success: 🍺 Archive uploaded successfully.
-      """
-
-    When I run `wp shifter archive delete $(wp shifter archive list --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS --format=json | jq -r .[0].archive_id) --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS`
-    Then STDOUT should contain:
-      """
-      Success: 🍺 Archive deleted successfully.
-      """
-
-    When I try `wp shifter archive delete xxxx --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS`
-    Then STDERR should contain:
-      """
-      Error: the archive does not exists
       """
 
   Scenario: Error test
