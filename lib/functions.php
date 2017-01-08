@@ -3,6 +3,7 @@
 class Shifter_CLI
 {
 	const archive_api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/archives";
+	const project_api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/projects";
 
 	public static function get_pre_signed_url( $token )
 	{
@@ -48,15 +49,8 @@ class Shifter_CLI
 				$username = $user['user'];
 				$password = $user['pass'];
 			}
-			$result = Shifter_CLI::auth( $username, $password );
-			if ( is_wp_error( $result ) ) {
-				WP_CLI::error( $result->get_error_message() );
-			} else {
-				$token = $result->AccessToken;
-			}
+			return Shifter_CLI::auth( $username, $password );
 		}
-
-		return $token;
 	}
 
 	/**
@@ -64,30 +58,18 @@ class Shifter_CLI
 	 */
 	public static function auth( $username, $password )
 	{
-		$result = wp_remote_post(
+		$result = self::post(
 			"https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/login",
-			array(
-				'method' => 'POST',
-				'timeout' => 45,
-				'redirection' => 5,
-				'httpversion' => '1.1',
-				'blocking' => true,
-				'headers' => array(),
-				'body' => json_encode( array(
-					"username" => $username,
-					"password" => $password
-				) ),
-				'cookies' => array(),
-			)
+			json_encode( array(
+				"username" => $username,
+				"password" => $password
+			) )
 		);
 
-		if ( is_wp_error( $result ) ) {
-			return $result;
-		} elseif ( 200 === $result['response']['code'] ) {
-			return json_decode( $result['body'] );
+		if ( 200 === $result['info']['http_code'] ) {
+			return $result['body']['AccessToken'];
 		} else {
-			$message = json_decode( $result['body'] )->message;
-			return new WP_Error( $result['response']['code'], $message );
+			WP_CLI::error( $result['body']['message'] );
 		}
 	}
 
@@ -375,5 +357,34 @@ class Shifter_CLI
 		} else {
 			return array();
 		}
+	}
+
+	/**
+	 * Post $post to $url.
+	 *
+	 * @param stirng $url The URL.
+	 * @param mixed $post An array or string of the post data.
+	 * @return array The HTTP response and body.
+	 */
+	public static function post( $url, $post, $token = null )
+	{
+		$ch = curl_init();
+		curl_setopt( $ch, CURLOPT_URL, $url );
+		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, 'POST' );
+		if ( $token ) {
+			curl_setopt( $ch, CURLOPT_HTTPHEADER, array(
+				"Authorization: " . $token,
+			) );
+		}
+		if ( is_array( $post ) ) {
+			curl_setopt( $ch, CURLOPT_POSTFIELDS, http_build_query( $post ) );
+		} else {
+			curl_setopt( $ch, CURLOPT_POSTFIELDS, $post );
+		}
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+		$result = json_decode( curl_exec( $ch ), true );
+		$info = curl_getinfo($ch);
+
+		return array( 'info' => $info, 'body' => $result );
 	}
 }
