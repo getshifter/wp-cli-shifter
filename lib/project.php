@@ -80,7 +80,7 @@ class WP_CLI_Shifter_Project extends WP_CLI_Command
 	 *
 	 * ## EXAMPLES
 	 *
-	 *   $ wp shifter project create --archive-id=xxxx --project-name="hello" ...
+	 *   $ wp shifter project create --archive-id=xxxx --php-version=7.0 --project-name="hello" ...
 	 *   Success: xxxx-xxxx-xxxx-xxxx
 	 *
 	 * @subcommand create
