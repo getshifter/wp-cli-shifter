@@ -24,10 +24,8 @@ class Shifter_CLI
 
 	public static function get_access_token( $args, $assoc_args )
 	{
-		$token = "";
-
 		if ( ! empty( $assoc_args['token'] ) ) {
-			$token = $assoc_args['token'];
+			return $assoc_args['token'];
 		} else {
 			if ( ! empty( $assoc_args['shifter-user'] ) && ! empty( $assoc_args['shifter-password'] ) ) {
 				$username = $assoc_args['shifter-user'];
@@ -39,6 +37,29 @@ class Shifter_CLI
 			}
 			return Shifter_CLI::auth( $username, $password );
 		}
+	}
+
+	public static function get_archive_list( $args, $assoc_args )
+	{
+		if ( isset( $assoc_args['format'] ) ) {
+			$format = $assoc_args['format'];
+		} else {
+			$format = 'table';
+		}
+
+		if ( ! in_array( $format, array( "table", "csv", "json" ) ) ) {
+			WP_CLI::error( 'Invalid format: ' . $assoc_args['format'] );
+		}
+
+		$token = self::get_access_token( $args, $assoc_args );
+
+		$args = array(
+			'headers' => array(
+				'Authorization' => $token
+			),
+		);
+
+		return self::get( self::archive_api, $token );
 	}
 
 	/**

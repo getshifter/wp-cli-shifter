@@ -89,7 +89,27 @@ class WP_CLI_Shifter_Project extends WP_CLI_Command
 	function create( $args, $assoc_args )
 	{
 		$token = Shifter_CLI::get_access_token( $args, $assoc_args );
-		$api = Shifter_CLI::project_api . '/?archive_id=' . $assoc_args['archive-id'];
+		$assoc_args['token'] = $token;
+
+		$result = Shifter_CLI::get_archive_list( $args, $assoc_args );
+
+		if ( 200 !== $result['info']['http_code'] ) {
+			WP_CLI::error( "Incorrect token." );
+		}
+
+		// Check archive-id exists.
+		$archive_id = null;
+		foreach ( $result['body'] as $archive ) {
+			if ( $assoc_args['archive-id'] === $archive['archive_id'] ) {
+				$archive_id = $assoc_args['archive-id'];
+			}
+		}
+
+		if ( empty( $archive_id ) ) {
+			WP_CLI::error( "Archive is not found." );
+		}
+
+		$api = Shifter_CLI::project_api . '/?archive_id=' . $archive_id;
 		$result = Shifter_CLI::post( $api, array(
 			"projectName" => $assoc_args['project-name'],
 			"phpVersion" => $assoc_args['php-version'],

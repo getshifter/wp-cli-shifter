@@ -97,25 +97,7 @@ class WP_CLI_Shifter_Archive extends WP_CLI_Command
 	 */
 	public function _list( $args, $assoc_args )
 	{
-		if ( isset( $assoc_args['format'] ) ) {
-			$format = $assoc_args['format'];
-		} else {
-			$format = 'table';
-		}
-
-		if ( ! in_array( $format, array( "table", "csv", "json" ) ) ) {
-			WP_CLI::error( 'Invalid format: ' . $assoc_args['format'] );
-		}
-
-		$token = Shifter_CLI::get_access_token( $args, $assoc_args );
-
-		$args = array(
-			'headers' => array(
-				'Authorization' => $token
-			),
-		);
-
-		$result = Shifter_CLI::get( Shifter_CLI::archive_api, $token );
+		$result = Shifter_CLI::get_archive_list( $args, $assoc_args );
 
 		if ( 200 === $result['info']['http_code'] ) {
 			$archives = $result['body'];
