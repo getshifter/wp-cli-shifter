@@ -41,16 +41,6 @@ class Shifter_CLI
 
 	public static function get_archive_list( $args, $assoc_args )
 	{
-		if ( isset( $assoc_args['format'] ) ) {
-			$format = $assoc_args['format'];
-		} else {
-			$format = 'table';
-		}
-
-		if ( ! in_array( $format, array( "table", "csv", "json" ) ) ) {
-			WP_CLI::error( 'Invalid format: ' . $assoc_args['format'] );
-		}
-
 		$token = self::get_access_token( $args, $assoc_args );
 
 		$args = array(
