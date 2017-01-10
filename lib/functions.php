@@ -19,14 +19,12 @@ class Functions
 
 		$result = self::post( $api, array(), $token );
 
-		if ( 200 === $result['info']['http_code'] ) {
-			if ( ! empty( $result['body']['url'] ) ) {
-				return $result['body']['url'];
-			} else {
-				return new Error( $result['body']['errorMessage'] );
-			}
+		if ( Error::is_error( $result ) ) {
+			return $result;
+		} elseif ( ! empty( $result['body']['url'] ) ) {
+			return $result['body']['url'];
 		} else {
-			return new Error( $result['body']['errorMessage'] );
+			return new Error( "Sorry, something went wrong. We're working on getting this fixed as soon as we can." );
 		}
 	}
 
@@ -329,36 +327,7 @@ class Functions
 	 */
 	public static function post( $url, $post, $token = null )
 	{
-		$ch = curl_init();
-		curl_setopt( $ch, CURLOPT_URL, $url );
-		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, 'POST' );
-		if ( $token ) {
-			curl_setopt( $ch, CURLOPT_HTTPHEADER, array(
-				"Authorization: " . $token,
-			) );
-		}
-		if ( is_array( $post ) ) {
-			curl_setopt( $ch, CURLOPT_POSTFIELDS, http_build_query( $post ) );
-		} else {
-			curl_setopt( $ch, CURLOPT_POSTFIELDS, $post );
-		}
-		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-		$result = json_decode( curl_exec( $ch ), true );
-		$info = curl_getinfo($ch);
-
-		if ( ! empty( $result['errorMessage'] ) ) {
-			return new Error( $result['errorMessage'] );
-		} elseif ( 200 === $info['http_code'] ) {
-			return array( 'info' => $info, 'body' => $result );
-		} else {
-			if ( ! empty( $result['message'] ) ) {
-				return new Error( $result['message'] );
-			} elseif ( ! empty( $result['errorMessage'] ) ) {
-				return new Error( $result['errorMessage'] );
-			} else {
-				return new Error( "Sorry, something went wrong. We're working on getting this fixed as soon as we can." );
-			}
-		}
+		return self::http( 'POST', $url, $post, $token );
 	}
 
 	/**
@@ -369,13 +338,32 @@ class Functions
 	 */
 	public static function get( $url, $token = null )
 	{
+		return self::http( 'GET', $url, null, $token );
+	}
+
+	/**
+	 * Send http get to $url.
+	 *
+	 * @param string $method The HTTP method.
+	 * @param stirng $url The URL.
+	 * @param array | string $params The parameters for POST.
+	 * @param string $token The token for the API.
+	 * @return array The HTTP response and body.
+	 */
+	public static function http( $method, $url, $params = null, $token = null )
+	{
 		$ch = curl_init();
 		curl_setopt( $ch, CURLOPT_URL, $url );
-		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, 'GET' );
+		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, $method );
 		if ( $token ) {
 			curl_setopt( $ch, CURLOPT_HTTPHEADER, array(
 				"Authorization: " . $token,
 			) );
+		}
+		if ( is_array( $params ) ) {
+			curl_setopt( $ch, CURLOPT_POSTFIELDS, http_build_query( $params ) );
+		} elseif ( $params ) {
+			curl_setopt( $ch, CURLOPT_POSTFIELDS, $params );
 		}
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
 		$result = json_decode( curl_exec( $ch ), true );

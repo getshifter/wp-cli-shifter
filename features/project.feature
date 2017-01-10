@@ -34,3 +34,18 @@ Feature: Test that `wp shifter archive` commands loads.
       """
       Success: 🍺 Project deleted successfully.
       """
+
+  Scenario: Error on create and delete project
+    Given an empty directory
+
+    When I try `wp shifter project create --archive-id=xxxx --project-name="Behat Test" --php-version=7.0 --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS`
+    Then STDERR should contain:
+      """
+      Error: Archive is not found.
+      """
+
+    When I try `wp shifter project delete xxxx --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS`
+    Then STDERR should contain:
+      """
+      Error: the site is not exists
+      """

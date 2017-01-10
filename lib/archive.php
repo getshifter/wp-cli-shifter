@@ -39,24 +39,13 @@ class Archive extends WP_CLI_Command
 			WP_CLI::error( $token->get_message() );
 		}
 
-		$ch = curl_init();
-		curl_setopt( $ch, CURLOPT_URL, Functions::archive_api . '/' . $args[0] );
-		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, 'DELETE' );
-		curl_setopt( $ch, CURLOPT_HTTPHEADER, array(
-			"Authorization: " . $token,
-		) );
-		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-		$result = json_decode( curl_exec( $ch ) );
-		$info = curl_getinfo($ch);
+		$api = Functions::archive_api . '/' . $args[0];
+		$result = Functions::http( 'DELETE', $api, null, $token );
 
-		if ( 200 === $info['http_code'] ) {
-			if ( empty( $result->errorMessage ) ) {
-				WP_CLI::success( "🍺 Archive deleted successfully." );
-			} else {
-				WP_CLI::error( $result->errorMessage );
-			}
+		if ( Error::is_error( $result ) ) {
+			WP_CLI::error( $result->get_message() );
 		} else {
-			WP_CLI::error( "Sorry, something went wrong. We're working on getting this fixed as soon as we can." );
+			WP_CLI::success( "🍺 Archive deleted successfully." );
 		}
 	}
 
