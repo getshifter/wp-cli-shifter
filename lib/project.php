@@ -50,7 +50,7 @@ class Project extends WP_CLI_Command
 	}
 
 	/**
-	 * Delete an project from the Shifter.
+	 * Get a list of projects from the Shifter.
 	 *
 	 * ## OPTIONS
 	 *
