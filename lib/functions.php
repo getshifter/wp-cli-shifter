@@ -1,6 +1,13 @@
 <?php
 
-class Shifter_CLI
+namespace Shifter_CLI;
+
+use RecursiveIteratorIterator;
+use RecursiveDirectoryIterator;
+use ZipArchive;
+use cli\prompt;
+
+class Functions
 {
 	const archive_api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/archives";
 	const project_api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/projects";
@@ -16,10 +23,10 @@ class Shifter_CLI
 			if ( ! empty( $result['body']['url'] ) ) {
 				return $result['body']['url'];
 			} else {
-				WP_CLI::error( $result['body']['errorMessage'] );
+				return new Error( $result['body']['errorMessage'] );
 			}
 		} else {
-			WP_CLI::error( $result['body']['message'] );
+			return new Error( $result['body']['errorMessage'] );
 		}
 	}
 
@@ -32,11 +39,11 @@ class Shifter_CLI
 				$username = $assoc_args['shifter-user'];
 				$password = $assoc_args['shifter-password'];
 			} else {
-				$user = Shifter_CLI::prompt_user_and_pass();
+				$user = self::prompt_user_and_pass();
 				$username = $user['user'];
 				$password = $user['pass'];
 			}
-			return Shifter_CLI::auth( $username, $password );
+			return self::auth( $username, $password );
 		}
 	}
 
@@ -53,10 +60,8 @@ class Shifter_CLI
 		return self::get( self::project_api, $token );
 	}
 
-	public static function get_archive_list( $args, $assoc_args )
+	public static function get_archive_list( $token )
 	{
-		$token = self::get_access_token( $args, $assoc_args );
-
 		$args = array(
 			'headers' => array(
 				'Authorization' => $token
@@ -79,10 +84,12 @@ class Shifter_CLI
 			) )
 		);
 
-		if ( 200 === $result['info']['http_code'] ) {
+		if ( Error::is_error( $result ) ) {
+			return $result;
+		} elseif ( ! empty( $result['body']['AccessToken'] ) ) {
 			return $result['body']['AccessToken'];
 		} else {
-			WP_CLI::error( $result['body']['message'] );
+			return new Error( $result['body']['message'] );
 		}
 	}
 
@@ -93,14 +100,14 @@ class Shifter_CLI
 	 */
 	public static function prompt_user_and_pass()
 	{
-		$user = trim( cli\prompt(
+		$user = trim( \cli\prompt(
 			'Shifter Username',
 			$default = false,
 			$marker = ': ',
 			$hide = false
 		) );
 
-		$pass = trim( cli\prompt(
+		$pass = trim( \cli\prompt(
 			'Password (will be hidden)',
 			$default = false,
 			$marker = ': ',
@@ -108,65 +115,6 @@ class Shifter_CLI
 		) );
 
 		return array( 'user' => $user, 'pass' => $pass );
-	}
-
-	/**
-	 * Create an archive.
-	 *
-	 * @param  array $args The `$args` for the WP-CLI.
-	 * @param  array $assoc_args The `$assoc_args` for the WP-CLI.
-	 * @return string The path to archive.
-	 */
-	public static function create_archive( $args, $assoc_args )
-	{
-		if ( ! WP_CLI::get_config( 'quiet' ) ) {
-			$progress = WP_CLI\Utils\make_progress_bar( 'Archiving an archive: ', 5 );
-		}
-
-		$tmp_dir = self::tempdir( 'SFT' );
-		if ( ! WP_CLI::get_config( 'quiet' ) ) {
-			$progress->tick();
-		}
-
-		$excludes = self::assoc_args_to_array( $assoc_args, "exclude" );
-
-		self::rcopy( ABSPATH, $tmp_dir . '/webroot', $excludes );
-		if ( ! WP_CLI::get_config( 'quiet' ) ) {
-			$progress->tick();
-		}
-
-		WP_CLI::launch_self(
-			"db export",
-			array( $tmp_dir . "/wp.sql" ),
-			array(),
-			true,
-			true,
-			array( 'path' => WP_CLI::get_runner()->config['path'] )
-		);
-		if ( ! WP_CLI::get_config( 'quiet' ) ) {
-			$progress->tick();
-		}
-
-		if ( empty( $args[0] ) ) {
-			$archive = getcwd() . "/archive.zip";
-		} else {
-			$archive = $args[0];
-		}
-
-		$file = self::zip( $tmp_dir, $archive );
-		if ( ! WP_CLI::get_config( 'quiet' ) ) {
-			$progress->tick();
-		}
-
-		self::rrmdir( $tmp_dir );
-		if ( is_wp_error( $file ) ) {
-			WP_CLI::error( $file->get_error_message() );
-		}
-		if ( ! WP_CLI::get_config( 'quiet' ) ) {
-			$progress->tick();
-		}
-
-		return $file;
 	}
 
 	/**
@@ -274,22 +222,22 @@ class Shifter_CLI
 		$src = untrailingslashit( $src );
 
 		if ( ! is_dir( $src ) ) {
-			return new WP_Error( "error", "No such file or directory." );
+			return new \WP_Error( "error", "No such file or directory." );
 		}
 
 		if ( ! is_dir( dirname( $destination ) ) ) {
-			return new WP_Error( "error", "No such file or directory." );
+			return new \WP_Error( "error", "No such file or directory." );
 		}
 
 		if ( ! extension_loaded( 'zip' ) || ! file_exists( $src ) ) {
-			return new WP_Error( "error", "PHP Zip extension is not installed. Please install it." );
+			return new \WP_Error( "error", "PHP Zip extension is not installed. Please install it." );
 		}
 
 		$destination = realpath( dirname( $destination ) ) . "/" . basename( $destination );
 
 		$zip = new ZipArchive();
 		if ( ! $zip->open( $destination, ZIPARCHIVE::CREATE ) ) {
-			return new WP_Error( "error", "No such file or directory." );
+			return new \WP_Error( "error", "No such file or directory." );
 		}
 
 		$iterator = self::get_files( $src );
@@ -305,7 +253,7 @@ class Shifter_CLI
 		$zip->close();
 
 		if ( ! is_file( $destination ) ) {
-			return new WP_Error( "error", "No such file or directory." );
+			return new \WP_Error( "error", "No such file or directory." );
 		}
 
 		return $destination;
@@ -321,7 +269,7 @@ class Shifter_CLI
 	public static function unzip( $src, $dest )
 	{
 		if ( ! is_file( $src ) ) {
-			return new WP_Error( "No such file or directory." );
+			return new \WP_Error( "No such file or directory." );
 		}
 
 		$zip = new ZipArchive;
@@ -333,7 +281,7 @@ class Shifter_CLI
 			return true;
 		}
 
-		return new WP_Error( "Can not open {$src}." );
+		return new \WP_Error( "Can not open {$src}." );
 	}
 
 	/**
@@ -398,7 +346,19 @@ class Shifter_CLI
 		$result = json_decode( curl_exec( $ch ), true );
 		$info = curl_getinfo($ch);
 
-		return array( 'info' => $info, 'body' => $result );
+		if ( ! empty( $result['errorMessage'] ) ) {
+			return new Error( $result['errorMessage'] );
+		} elseif ( 200 === $info['http_code'] ) {
+			return array( 'info' => $info, 'body' => $result );
+		} else {
+			if ( ! empty( $result['message'] ) ) {
+				return new Error( $result['message'] );
+			} elseif ( ! empty( $result['errorMessage'] ) ) {
+				return new Error( $result['errorMessage'] );
+			} else {
+				return new Error( "Sorry, something went wrong. We're working on getting this fixed as soon as we can." );
+			}
+		}
 	}
 
 	/**
@@ -421,6 +381,18 @@ class Shifter_CLI
 		$result = json_decode( curl_exec( $ch ), true );
 		$info = curl_getinfo($ch);
 
-		return array( 'info' => $info, 'body' => $result );
+		if ( ! empty( $result['errorMessage'] ) ) {
+			return new Error( $result['errorMessage'] );
+		} elseif ( 200 === $info['http_code'] ) {
+			return array( 'info' => $info, 'body' => $result );
+		} else {
+			if ( ! empty( $result['message'] ) ) {
+				return new Error( $result['message'] );
+			} elseif ( ! empty( $result['errorMessage'] ) ) {
+				return new Error( $result['errorMessage'] );
+			} else {
+				return new Error( "Sorry, something went wrong. We're working on getting this fixed as soon as we can." );
+			}
+		}
 	}
 }

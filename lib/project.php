@@ -1,12 +1,16 @@
 <?php
 
+namespace Shifter_CLI;
+use WP_CLI_Command;
+use WP_CLI;
+
 /**
  * Manage projects for the Shifter.
  *
  * @subpackage commands/community
  * @maintainer Shifter Team
  */
-class WP_CLI_Shifter_Project extends WP_CLI_Command
+class Project extends WP_CLI_Command
 {
 	/**
 	 * Delete an archive from the Shifter.
@@ -30,10 +34,13 @@ class WP_CLI_Shifter_Project extends WP_CLI_Command
 	 */
 	public function delete( $args, $assoc_args )
 	{
-		$token = Shifter_CLI::get_access_token( $args, $assoc_args );
+		$token = Functions::get_access_token( $args, $assoc_args );
+		if ( Error::is_error( $token ) ) {
+			WP_CLI::error( $token->get_message() );
+		}
 
 		$ch = curl_init();
-		curl_setopt( $ch, CURLOPT_URL, Shifter_CLI::project_api . '/' . $args[0] );
+		curl_setopt( $ch, CURLOPT_URL, Functions::project_api . '/' . $args[0] );
 		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, 'DELETE' );
 		curl_setopt( $ch, CURLOPT_HTTPHEADER, array(
 			"Authorization: " . $token,
@@ -85,7 +92,7 @@ class WP_CLI_Shifter_Project extends WP_CLI_Command
 			WP_CLI::error( 'Invalid format: ' . $assoc_args['format'] );
 		}
 
-		$result = Shifter_CLI::get_project_list( $args, $assoc_args );
+		$result = Functions::get_project_list( $args, $assoc_args );
 
 		if ( 200 === $result['info']['http_code'] ) {
 			// `docker_url` sometimes doesn't exist. So it can't display it.
@@ -133,13 +140,14 @@ class WP_CLI_Shifter_Project extends WP_CLI_Command
 	 */
 	function create( $args, $assoc_args )
 	{
-		$token = Shifter_CLI::get_access_token( $args, $assoc_args );
-		$assoc_args['token'] = $token;
+		$token = Functions::get_access_token( $args, $assoc_args );
+		if ( Error::is_error( $token ) ) {
+			WP_CLI::error( $token->get_message() );
+		}
 
-		$result = Shifter_CLI::get_archive_list( $args, $assoc_args );
-
-		if ( 200 !== $result['info']['http_code'] ) {
-			WP_CLI::error( "Incorrect token." );
+		$result = Functions::get_archive_list( $token );
+		if ( Error::is_error( $result ) ) {
+			WP_CLI::error( $result->get_message() );
 		}
 
 		// Check archive-id exists.
@@ -154,16 +162,18 @@ class WP_CLI_Shifter_Project extends WP_CLI_Command
 			WP_CLI::error( "Archive is not found." );
 		}
 
-		$api = Shifter_CLI::project_api . '/?archive_id=' . $archive_id;
-		$result = Shifter_CLI::post( $api, array(
+		$api = Functions::project_api . '/?archive_id=' . $archive_id;
+		$result = Functions::post( $api, array(
 			"projectName" => $assoc_args['project-name'],
 			"phpVersion" => $assoc_args['php-version'],
 		), $token );
 
-		if ( 200 === $result['info']['http_code'] ) {
+		if ( Error::is_error( $result ) ) {
+			WP_CLI::error( $result->get_message() );
+		} elseif ( 200 === $result['info']['http_code'] ) {
 			$site_id = $result['body']['site_id'];
-			$api = Shifter_CLI::container_api . '/' . $site_id;
-			$result = Shifter_CLI::post( $api, array(), $token );
+			$api = Functions::container_api . '/' . $site_id;
+			$result = Functions::post( $api, array(), $token );
 			if ( 200 === $result['info']['http_code'] ) {
 				WP_CLI::success( $site_id );
 				exit;

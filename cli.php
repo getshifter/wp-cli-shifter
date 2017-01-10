@@ -4,6 +4,7 @@ if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
 	return;
 }
 
+require_once( dirname( __FILE__ ) . "/lib/error.php" );
 require_once( dirname( __FILE__ ) . "/lib/functions.php" );
 require_once( dirname( __FILE__ ) . "/lib/archive.php" );
 require_once( dirname( __FILE__ ) . "/lib/project.php" );
@@ -30,5 +31,5 @@ class WP_CLI_Shifter extends WP_CLI_Command
 }
 
 WP_CLI::add_command( 'shifter', 'WP_CLI_Shifter' );
-WP_CLI::add_command( 'shifter archive', 'WP_CLI_Shifter_Archive' );
-WP_CLI::add_command( 'shifter project', 'WP_CLI_Shifter_Project' );
+WP_CLI::add_command( 'shifter archive', 'Shifter_CLI\Archive' );
+WP_CLI::add_command( 'shifter project', 'Shifter_CLI\Project' );

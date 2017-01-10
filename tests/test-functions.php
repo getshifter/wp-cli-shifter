@@ -1,24 +1,39 @@
 <?php
 
+use Shifter_CLI\Functions;
+use Shifter_CLI\Error;
+
 class SimpleMapTest extends WP_UnitTestCase
 {
 	/**
 	 * @test
 	 */
+	public function error_test()
+	{
+		$e = new Error( 'error!' );
+		$this->assertTrue( Error::is_error( $e ) );
+		$this->assertSame( 'error!', $e->get_message() );
+	}
+
+	/**
+	 * @test
+	 */
 	public function auth()
 	{
-		// ob_start();
-		// Shifter_CLI::auth( "foo", "bar" );
-		// $res = ob_get_contents();
-		// ob_end_clean();
-		// $this->assertContain( "User does not exist.", $res );
+		$res = Functions::auth( "foo", "bar" );
+		$this->assertTrue( Error::is_error( $res ) );
+		$this->assertSame( 'User does not exist.', $res->get_message() );
 
-		$res = Shifter_CLI::auth( getenv( "SHIFTER_USER" ), getenv( "SHIFTER_PASS" ) );
+		$res = Functions::auth( getenv( "SHIFTER_USER" ), "bar" );
+		$this->assertTrue( Error::is_error( $res ) );
+		$this->assertSame( 'Incorrect username or password.', $res->get_message() );
+
+		$res = Functions::auth( getenv( "SHIFTER_USER" ), getenv( "SHIFTER_PASS" ) );
 		$this->assertTrue( !! $res );
 	}
 
 	/**
-	 * Tests for the `Shifter_CLI::rempty()`.
+	 * Tests for the `Functions::rempty()`.
 	 *
 	 * @test
 	 * @since 0.1.0
@@ -26,38 +41,38 @@ class SimpleMapTest extends WP_UnitTestCase
 	public function rempty()
 	{
 		$dir = self::mockdir();
-		$files = Shifter_CLI::get_files( $dir );
+		$files = Functions::get_files( $dir );
 		$this->assertSame( 7, iterator_count($files) );
 
 		$dir = self::mockdir();
-		Shifter_CLI::rempty( $dir );
-		$files = Shifter_CLI::get_files( $dir );
+		Functions::rempty( $dir );
+		$files = Functions::get_files( $dir );
 		$this->assertSame( 0, iterator_count($files) );
 
 		$dir = self::mockdir();
 
-		Shifter_CLI::rempty( $dir, array(
+		Functions::rempty( $dir, array(
 			"dir02/dir02-01.txt",
 			"dir01/dir01-01/dir01-01-01.txt"
 		) );
-		$files = Shifter_CLI::get_files( $dir );
+		$files = Functions::get_files( $dir );
 		$this->assertSame( 5, iterator_count($files) );
 	}
 
 	/**
-	 * Tests for the `Shifter_CLI::tempdir()`.
+	 * Tests for the `Functions::tempdir()`.
 	 *
 	 * @test
 	 * @since 0.1.0
 	 */
 	public function tempdir()
 	{
-		$dir = Shifter_CLI::tempdir();
+		$dir = Functions::tempdir();
 		$this->assertTrue( is_dir( $dir ) ); // $dir should exists.
 	}
 
 	/**
-	 * Tests for the `Shifter_CLI::rrmdir()`.
+	 * Tests for the `Functions::rrmdir()`.
 	 *
 	 * @test
 	 * @since 0.1.0
@@ -67,12 +82,12 @@ class SimpleMapTest extends WP_UnitTestCase
 		$dir = self::mockdir();
 		$this->assertTrue( is_dir( $dir ) ); // $dir should exists.
 
-		Shifter_CLI::rrmdir( $dir );
+		Functions::rrmdir( $dir );
 		$this->assertFalse( is_dir( $dir ) ); // $dir should not exists.
 	}
 
 	/**
-	 * Tests for the `Shifter_CLI::rcopy()`.
+	 * Tests for the `Functions::rcopy()`.
 	 *
 	 * @test
 	 * @since 0.1.0
@@ -82,23 +97,23 @@ class SimpleMapTest extends WP_UnitTestCase
 		$src = self::mockdir();
 		$this->assertTrue( is_dir( $src ) ); // $dir should exists.
 
-		$dest = Shifter_CLI::tempdir();
+		$dest = Functions::tempdir();
 		$this->assertTrue( is_dir( $dest ) ); // $dir should exists.
 		$this->assertTrue( self::md5sum( $src ) !== self::md5sum( $dest ) );
 
 		// Copy directory recursively then check md5.
-		Shifter_CLI::rcopy( $src, $dest );
+		Functions::rcopy( $src, $dest );
 		$this->assertTrue( self::md5sum( $src ) === self::md5sum( $dest ) );
 
-		$dest = Shifter_CLI::tempdir();
-		Shifter_CLI::rcopy( $src, $dest, array( "dir01/dir01-01.txt" ) );
+		$dest = Functions::tempdir();
+		Functions::rcopy( $src, $dest, array( "dir01/dir01-01.txt" ) );
 		$this->assertFalse( is_file( $dest . '/dir01/dir01-01.txt' ) );
 		$this->assertTrue( is_file( $dest . '/dir01/dir01-02.txt' ) );
 		$this->assertTrue( is_file( $dest . '/dir02/dir02-01.txt' ) );
 	}
 
 	/**
-	 * Tests for the `Shifter_CLI::zip()`.
+	 * Tests for the `Functions::zip()`.
 	 *
 	 * @test
 	 * @since 0.1.0
@@ -108,15 +123,15 @@ class SimpleMapTest extends WP_UnitTestCase
 		$src = self::mockdir();
 		$this->assertTrue( is_dir( $src ) ); // $dir should exists.
 
-		$dir = Shifter_CLI::tempdir();
+		$dir = Functions::tempdir();
 
 		// zip $src
-		Shifter_CLI::zip( $src, $dir . '/archive.zip' );
+		Functions::zip( $src, $dir . '/archive.zip' );
 		$this->assertTrue( is_file( $dir . '/archive.zip' ) );
 
 		// unzip to $dir . "/tmp"
 		mkdir( $dir . "/tmp" );
-		Shifter_CLI::unzip( $dir . '/archive.zip', $dir . "/tmp" );
+		Functions::unzip( $dir . '/archive.zip', $dir . "/tmp" );
 		$this->assertTrue( self::md5sum( $src ) === self::md5sum( $dir . "/tmp" ) );
 	}
 
@@ -128,7 +143,7 @@ class SimpleMapTest extends WP_UnitTestCase
 	 */
 	public static function mockdir()
 	{
-		$dir = Shifter_CLI::tempdir();
+		$dir = Functions::tempdir();
 		mkdir( $dir . "/dir01" );
 		file_put_contents( $dir . "/dir01/dir01-01.txt", time() );
 		file_put_contents( $dir . "/dir01/dir01-02.txt", time() );
@@ -153,7 +168,7 @@ class SimpleMapTest extends WP_UnitTestCase
 			return false;
 		}
 
-		$iterator = Shifter_CLI::get_files( $dir );
+		$iterator = Functions::get_files( $dir );
 
 		$md5 = array();
 		foreach ( $iterator as $item ) {
