@@ -161,10 +161,11 @@ class WP_CLI_Shifter_Project extends WP_CLI_Command
 		), $token );
 
 		if ( 200 === $result['info']['http_code'] ) {
-			$api = Shifter_CLI::container_api . '/' . $result['body']['site_id'];
+			$site_id = $result['body']['site_id'];
+			$api = Shifter_CLI::container_api . '/' . $site_id;
 			$result = Shifter_CLI::post( $api, array(), $token );
 			if ( 200 === $result['info']['http_code'] ) {
-				WP_CLI::success( $result['body']['site_id'] );
+				WP_CLI::success( $site_id );
 				exit;
 			}
 		}
