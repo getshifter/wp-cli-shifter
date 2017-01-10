@@ -35,6 +35,12 @@ Feature: Test that `wp shifter archive` commands loads.
       Success: 🍺 Project deleted successfully.
       """
 
+    When I run `wp shifter archive delete $(wp shifter archive list --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS --format=json | jq -r .[0].archive_id) --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS`
+    Then STDOUT should contain:
+      """
+      Success: 🍺 Archive deleted successfully.
+      """
+
   Scenario: Error on create and delete project
     Given an empty directory
 
