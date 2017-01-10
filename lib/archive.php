@@ -8,14 +8,12 @@
  */
 class WP_CLI_Shifter_Archive extends WP_CLI_Command
 {
-	private $version = "v1.5.1";
-
 	/**
 	 * Delete an archive from the Shifter.
 	 *
 	 * ## OPTIONS
 	 *
-	 * <archive_id>
+	 * <archive-id>
 	 * : The archive_id.
 	 *
 	 * [--token=<token>]

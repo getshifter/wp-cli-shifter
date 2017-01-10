@@ -8,15 +8,13 @@
  */
 class WP_CLI_Shifter_Project extends WP_CLI_Command
 {
-	private $version = "v1.5.1";
-
 	/**
-	 * Delete an project from the Shifter.
+	 * Delete an archive from the Shifter.
 	 *
 	 * ## OPTIONS
 	 *
-	 * <project_id>
-	 * : The project_id.
+	 * <site-id>
+	 * : The site-id.
 	 *
 	 * [--token=<token>]
 	 * : The access token to communinate with the Shifter API.
@@ -46,12 +44,59 @@ class WP_CLI_Shifter_Project extends WP_CLI_Command
 
 		if ( 200 === $info['http_code'] ) {
 			if ( empty( $result->errorMessage ) ) {
-				WP_CLI::success( "🍺 project deleted successfully." );
+				WP_CLI::success( "🍺 Project deleted successfully." );
 			} else {
 				WP_CLI::error( $result->errorMessage );
 			}
 		} else {
 			WP_CLI::error( "Sorry, something went wrong. We're working on getting this fixed as soon as we can." );
+		}
+	}
+
+	/**
+	 * Delete an project from the Shifter.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--token=<token>]
+	 * : The access token to communinate with the Shifter API.
+	 *
+	 * [--shifter-user=<username>]
+	 * : The username for the Shifter.
+	 *
+	 * [--shifter-password=<password>]
+	 * : The password for the Shifter.
+	 *
+	 * [--format=<format>]
+	 * : Accepted values: table, csv, json, count. Default: table
+	 *
+	 * @subcommand list
+	 * @when before_wp_load
+	 */
+	public function _list( $args, $assoc_args )
+	{
+		if ( isset( $assoc_args['format'] ) ) {
+			$format = $assoc_args['format'];
+		} else {
+			$format = 'table';
+		}
+
+		if ( ! in_array( $format, array( "table", "csv", "json" ) ) ) {
+			WP_CLI::error( 'Invalid format: ' . $assoc_args['format'] );
+		}
+
+		$result = Shifter_CLI::get_project_list( $args, $assoc_args );
+
+		if ( 200 === $result['info']['http_code'] ) {
+			// `docker_url` sometimes doesn't exist. So it can't display it.
+			WP_CLI\Utils\format_items( $format, $result['body'], array(
+				'site_id',
+				'site_name',
+				'site_owner',
+				'update_time'
+			) );
+		} else {
+			WP_CLI::error( "Incorrect token." );
 		}
 	}
 
@@ -116,9 +161,14 @@ class WP_CLI_Shifter_Project extends WP_CLI_Command
 		), $token );
 
 		if ( 200 === $result['info']['http_code'] ) {
-			WP_CLI::success( $result['body']['site_id'] );
-		} else {
-			WP_CLI::error( "Sorry, something went wrong. We're working on getting this fixed as soon as we can." );
+			$api = Shifter_CLI::container_api . '/' . $result['body']['site_id'];
+			$result = Shifter_CLI::post( $api, array(), $token );
+			if ( 200 === $result['info']['http_code'] ) {
+				WP_CLI::success( $result['body']['site_id'] );
+				exit;
+			}
 		}
+
+		WP_CLI::error( "Sorry, something went wrong. We're working on getting this fixed as soon as we can." );
 	}
 }

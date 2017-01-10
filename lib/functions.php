@@ -4,6 +4,7 @@ class Shifter_CLI
 {
 	const archive_api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/archives";
 	const project_api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/projects";
+	const container_api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/containers";
 
 	public static function get_pre_signed_url( $token )
 	{
@@ -37,6 +38,19 @@ class Shifter_CLI
 			}
 			return Shifter_CLI::auth( $username, $password );
 		}
+	}
+
+	public static function get_project_list( $args, $assoc_args )
+	{
+		$token = self::get_access_token( $args, $assoc_args );
+
+		$args = array(
+			'headers' => array(
+				'Authorization' => $token
+			),
+		);
+
+		return self::get( self::project_api, $token );
 	}
 
 	public static function get_archive_list( $args, $assoc_args )
