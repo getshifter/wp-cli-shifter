@@ -162,6 +162,7 @@ class Project extends WP_CLI_Command
 		} elseif ( 200 === $result['info']['http_code'] ) {
 			$site_id = $result['body']['site_id'];
 			WP_CLI::success( $site_id );
+			exit;
 		}
 
 		WP_CLI::error( "Sorry, something went wrong. We're working on getting this fixed as soon as we can." );
