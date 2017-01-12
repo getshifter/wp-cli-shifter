@@ -1,21 +1,23 @@
 <?php
 
+namespace Shifter_CLI;
+use WP_CLI_Command;
+use WP_CLI;
+
 /**
  * Manage archives for the Shifter.
  *
  * @subpackage commands/community
  * @maintainer Shifter Team
  */
-class WP_CLI_Shifter_Archive extends WP_CLI_Command
+class Archive extends WP_CLI_Command
 {
-	private $version = "v1.5.1";
-
 	/**
 	 * Delete an archive from the Shifter.
 	 *
 	 * ## OPTIONS
 	 *
-	 * <archive_id>
+	 * <archive-id>
 	 * : The archive_id.
 	 *
 	 * [--token=<token>]
@@ -28,29 +30,22 @@ class WP_CLI_Shifter_Archive extends WP_CLI_Command
 	 * : The password for the Shifter.
 	 *
 	 * @subcommand delete
+	 * @when before_wp_load
 	 */
 	public function delete( $args, $assoc_args )
 	{
-		$token = Shifter_CLI::get_access_token( $args, $assoc_args );
+		$token = Functions::get_access_token( $args, $assoc_args );
+		if ( Error::is_error( $token ) ) {
+			WP_CLI::error( $token->get_message() );
+		}
 
-		$ch = curl_init();
-		curl_setopt( $ch, CURLOPT_URL, Shifter_CLI::archive_api . '/' . $args[0] );
-		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, 'DELETE' );
-		curl_setopt( $ch, CURLOPT_HTTPHEADER, array(
-			"Authorization: " . $token,
-		) );
-		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-		$result = json_decode( curl_exec( $ch ) );
-		$info = curl_getinfo($ch);
+		$api = Functions::archive_api . '/' . $args[0];
+		$result = Functions::http( 'DELETE', $api, null, $token );
 
-		if ( 200 === $info['http_code'] ) {
-			if ( empty( $result->errorMessage ) ) {
-				WP_CLI::success( "🍺 Archive deleted successfully." );
-			} else {
-				WP_CLI::error( $result->errorMessage );
-			}
+		if ( Error::is_error( $result ) ) {
+			WP_CLI::error( $result->get_message() );
 		} else {
-			WP_CLI::error( "Sorry, something went wrong. We're working on getting this fixed as soon as we can." );
+			WP_CLI::success( "🍺 Archive deleted successfully." );
 		}
 	}
 
@@ -92,6 +87,7 @@ class WP_CLI_Shifter_Archive extends WP_CLI_Command
 	 *   ]
 	 *
 	 * @subcommand list
+	 * @when before_wp_load
 	 */
 	public function _list( $args, $assoc_args )
 	{
@@ -105,27 +101,21 @@ class WP_CLI_Shifter_Archive extends WP_CLI_Command
 			WP_CLI::error( 'Invalid format: ' . $assoc_args['format'] );
 		}
 
-		$token = Shifter_CLI::get_access_token( $args, $assoc_args );
-
-		$args = array(
-			'headers' => array(
-				'Authorization' => $token
-			),
-		);
-
-		$result = wp_remote_get(
-			Shifter_CLI::archive_api,
-			$args
-		);
-
-		if ( is_wp_error( $result ) ) {
-			return $result;
-		} elseif ( 200 === $result['response']['code'] ) {
-			$archives = json_decode( $result['body'] );
-			WP_CLI\Utils\format_items( $format, $archives, array( 'archive_id', 'archive_owner', 'archive_create_date' ) );
-		} else {
-			return new WP_Error( $result['response']['code'], "Incorrect token." );
+		$token = Functions::get_access_token( $args, $assoc_args );
+		if ( Error::is_error( $token ) ) {
+			WP_CLI::error( $token->get_message() );
 		}
+
+		$result = Functions::get_archive_list( $token );
+		if ( Error::is_error( $result ) ) {
+			WP_CLI::error( $result->get_message() );
+		}
+
+		WP_CLI\Utils\format_items( $format, $result['body'], array(
+			'archive_id',
+			'archive_owner',
+			'archive_create_date'
+		) );
 	}
 
 	/**
@@ -158,16 +148,19 @@ class WP_CLI_Shifter_Archive extends WP_CLI_Command
 	 */
 	function upload( $args, $assoc_args )
 	{
-		$token = Shifter_CLI::get_access_token( $args, $assoc_args );
+		$token = Functions::get_access_token( $args, $assoc_args );
+		if ( Error::is_error( $token ) ) {
+			WP_CLI::error( $token->get_message() );
+		}
 
-		$signed_url = Shifter_CLI::get_pre_signed_url( $token );
-		if ( is_wp_error( $signed_url ) ) {
-			WP_CLI::error( $signed_url->get_error_message() );
+		$signed_url = Functions::get_pre_signed_url( $token );
+		if ( Error::is_error( $signed_url ) ) {
+			WP_CLI::error( $signed_url->get_message() );
 		}
 
 		if ( empty( $args[0] ) ) {
-			$archive = Shifter_CLI::create_archive(
-				array( Shifter_CLI::tempdir() . '/archive.zip' ),
+			$archive = Functions::create_archive(
+				array( Functions::tempdir() . '/archive.zip' ),
 				$assoc_args
 			);
 			WP_CLI::success( "Created an archive." );
@@ -229,8 +222,54 @@ class WP_CLI_Shifter_Archive extends WP_CLI_Command
 	 */
 	function create( $args, $assoc_args )
 	{
-		$res = Shifter_CLI::create_archive( $args, $assoc_args );
-		WP_CLI::success( sprintf( "Archived to '%s'.", $res ) );
+		if ( ! WP_CLI::get_config( 'quiet' ) ) {
+			$progress = WP_CLI\Utils\make_progress_bar( 'Archiving an archive: ', 5 );
+		}
+
+		$tmp_dir = Functions::tempdir( 'SFT' );
+		if ( ! WP_CLI::get_config( 'quiet' ) ) {
+			$progress->tick();
+		}
+
+		$excludes = Functions::assoc_args_to_array( $assoc_args, "exclude" );
+
+		Functions::rcopy( ABSPATH, $tmp_dir . '/webroot', $excludes );
+		if ( ! WP_CLI::get_config( 'quiet' ) ) {
+			$progress->tick();
+		}
+
+		WP_CLI::launch_self(
+			"db export",
+			array( $tmp_dir . "/wp.sql" ),
+			array(),
+			true,
+			true,
+			array( 'path' => WP_CLI::get_runner()->config['path'] )
+		);
+		if ( ! WP_CLI::get_config( 'quiet' ) ) {
+			$progress->tick();
+		}
+
+		if ( empty( $args[0] ) ) {
+			$archive = getcwd() . "/archive.zip";
+		} else {
+			$archive = $args[0];
+		}
+
+		$file = Functions::zip( $tmp_dir, $archive );
+		if ( ! WP_CLI::get_config( 'quiet' ) ) {
+			$progress->tick();
+		}
+
+		Functions::rrmdir( $tmp_dir );
+		if ( is_wp_error( $file ) ) {
+			WP_CLI::error( $file->get_error_message() );
+		}
+		if ( ! WP_CLI::get_config( 'quiet' ) ) {
+			$progress->tick();
+		}
+
+		WP_CLI::success( sprintf( "Archived to '%s'.", $file ) );
 	}
 
 	/**
@@ -275,8 +314,8 @@ class WP_CLI_Shifter_Archive extends WP_CLI_Command
 			$progress->tick();
 		}
 
-		$tmp_dir = Shifter_CLI::tempdir( 'SFT' );
-		$res = Shifter_CLI::unzip( $args[0], $tmp_dir );
+		$tmp_dir = Functions::tempdir( 'SFT' );
+		$res = Functions::unzip( $args[0], $tmp_dir );
 		if ( is_wp_error( $res ) ) {
 			WP_CLI::error( $res->get_error_message() );
 		}
@@ -285,23 +324,23 @@ class WP_CLI_Shifter_Archive extends WP_CLI_Command
 		}
 
 		if ( ! is_dir( $tmp_dir . '/webroot' ) || ! is_file( $tmp_dir . '/wp.sql' ) ) {
-			Shifter_CLI::rrmdir( $tmp_dir );
+			Functions::rrmdir( $tmp_dir );
 			WP_CLI::error( sprintf( "Can't extract from '%s'.", $args[0] ) );
 		}
 		if ( ! WP_CLI::get_config( 'quiet' ) ) {
 			$progress->tick();
 		}
 
-		$excludes = Shifter_CLI::assoc_args_to_array( $assoc_args, "exclude" );
+		$excludes = Functions::assoc_args_to_array( $assoc_args, "exclude" );
 
 		if ( ! empty( $assoc_args['delete'] ) ) {
-			Shifter_CLI::rempty( ABSPATH, $excludes );
+			Functions::rempty( ABSPATH, $excludes );
 		}
 		if ( ! WP_CLI::get_config( 'quiet' ) ) {
 			$progress->tick();
 		}
 
-		Shifter_CLI::rcopy( $tmp_dir . '/webroot', ABSPATH, $excludes );
+		Functions::rcopy( $tmp_dir . '/webroot', ABSPATH, $excludes );
 		if ( ! WP_CLI::get_config( 'quiet' ) ) {
 			$progress->tick();
 		}
@@ -316,7 +355,7 @@ class WP_CLI_Shifter_Archive extends WP_CLI_Command
 				array( 'path' => WP_CLI::get_runner()->config['path'] )
 			);
 			if ( $result->return_code ) {
-				Shifter_CLI::rrmdir( $tmp_dir );
+				Functions::rrmdir( $tmp_dir );
 				WP_CLI::error( sprintf( "Can't import database from '%s'.", $args[0] ) );
 			}
 		}
@@ -324,7 +363,7 @@ class WP_CLI_Shifter_Archive extends WP_CLI_Command
 			$progress->tick();
 		}
 
-		Shifter_CLI::rrmdir( $tmp_dir );
+		Functions::rrmdir( $tmp_dir );
 		if ( ! WP_CLI::get_config( 'quiet' ) ) {
 			$progress->tick();
 		}
