@@ -45,27 +45,26 @@ class Functions
 		}
 	}
 
+	public static function get_project( $args, $assoc_args )
+	{
+		$token = self::get_access_token( $args, $assoc_args );
+		if ( Error::is_error( $token ) ) {
+			return $token;
+		}
+		return self::get( self::project_api . '/' . $args[0], $token );
+	}
+
 	public static function get_project_list( $args, $assoc_args )
 	{
 		$token = self::get_access_token( $args, $assoc_args );
-
-		$args = array(
-			'headers' => array(
-				'Authorization' => $token
-			),
-		);
-
+		if ( Error::is_error( $token ) ) {
+			return $token;
+		}
 		return self::get( self::project_api, $token );
 	}
 
 	public static function get_archive_list( $token )
 	{
-		$args = array(
-			'headers' => array(
-				'Authorization' => $token
-			),
-		);
-
 		return self::get( self::archive_api, $token );
 	}
 
