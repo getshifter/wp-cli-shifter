@@ -22,7 +22,7 @@ class Functions
 		if ( Error::is_error( $result ) ) {
 			return $result;
 		} elseif ( ! empty( $result['body']['url'] ) ) {
-			return $result['body']['url'];
+			return $result['body'];
 		} else {
 			return new Error( "Sorry, something went wrong. We're working on getting this fixed as soon as we can." );
 		}
@@ -32,6 +32,8 @@ class Functions
 	{
 		if ( ! empty( $assoc_args['token'] ) ) {
 			return $assoc_args['token'];
+		} elseif ( self::get_local_token() && ( empty( $assoc_args['shifter-user'] ) && empty( $assoc_args['shifter-password'] ) ) ) {
+			return self::get_local_token();
 		} else {
 			if ( ! empty( $assoc_args['shifter-user'] ) && ! empty( $assoc_args['shifter-password'] ) ) {
 				$username = $assoc_args['shifter-user'];
@@ -66,6 +68,23 @@ class Functions
 	public static function get_archive_list( $token )
 	{
 		return self::get( self::archive_api, $token );
+	}
+
+	public static function get_local_token()
+	{
+		$home = self::get_home_dir();
+		if ( is_file( $home . '/.wp-cli/.shifter.key' ) ) {
+			return file_get_contents( $home . '/.wp-cli/.shifter.key' );
+		} else {
+			return "";
+		}
+	}
+
+	public static function save_local_token( $token )
+	{
+		$home = self::get_home_dir();
+		$file = $home . '/.wp-cli/.shifter.key';
+		file_put_contents( $file, $token );
 	}
 
 	/**
@@ -112,6 +131,16 @@ class Functions
 		) );
 
 		return array( 'user' => $user, 'pass' => $pass );
+	}
+
+	public static function get_home_dir()
+	{
+		$home = getenv( 'HOME' );
+		if ( !$home ) {
+			// sometime in windows $HOME is not defined
+			$home = getenv( 'HOMEDRIVE' ) . getenv( 'HOMEPATH' );
+		}
+		return preg_replace( "#/$#", "", $home );
 	}
 
 	/**

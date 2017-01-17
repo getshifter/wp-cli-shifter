@@ -94,7 +94,7 @@ Feature: Test that `wp shifter archive` commands loads.
     When I run `wp shifter archive upload archive.zip --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS`
     Then STDOUT should contain:
       """
-      Success: 🍺 Archive uploaded successfully.
+      Success: Archive ID:
       """
 
   Scenario: List archives
