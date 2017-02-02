@@ -18,7 +18,7 @@ require_once( dirname( __FILE__ ) . "/lib/login.php" );
  */
 class WP_CLI_Shifter extends WP_CLI_Command
 {
-	private $version = "v1.6.0";
+	private $version = "v1.7.0";
 
 	/**
 	 * Prints current version of the shifter/cli.
