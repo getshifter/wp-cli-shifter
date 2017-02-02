@@ -141,8 +141,7 @@ class Archive extends WP_CLI_Command
 	 *   Shifter Username: jack
 	 *   Password (will be hidden):
 	 *   Success: Logged in as jack
-	 *   Creating an archive:   100% [=======================] 0:23 / 0:04Success: Created an archive.
-	 *   Success: 🍺 Archive uploaded successfully.
+	 *   Success: Archive ID: db81bb93-13f8-41d1-9605-4cc397e52192
 	 *
 	 * @subcommand upload
 	 */
@@ -159,9 +158,10 @@ class Archive extends WP_CLI_Command
 		}
 
 		if ( empty( $args[0] ) ) {
+			$archive = Functions::tempdir() . '/archive.zip';
 			WP_CLI::launch_self(
 				"shifter archive create",
-				array( Functions::tempdir() . '/archive.zip' ),
+				array( $archive ),
 				$assoc_args,
 				true,
 				true,
@@ -177,7 +177,7 @@ class Archive extends WP_CLI_Command
 
 		$ch = curl_init();
 
-		curl_setopt( $ch, CURLOPT_URL, $signed_url );
+		curl_setopt( $ch, CURLOPT_URL, $signed_url['url'] );
 		curl_setopt( $ch, CURLOPT_PUT, 1 );
 		curl_setopt( $ch, CURLOPT_HTTPHEADER, array(
 			"Content-Type: application/zip",
@@ -191,7 +191,7 @@ class Archive extends WP_CLI_Command
 		fclose( $fh_res );
 
 		if ( 200 === $info['http_code'] ) {
-			WP_CLI::success( "🍺 Archive uploaded successfully." );
+			WP_CLI::success( "Archive ID: " . $signed_url['archive_id'] );
 		} else {
 			WP_CLI::error( "Sorry, something went wrong. We're working on getting this fixed as soon as we can." );
 		}

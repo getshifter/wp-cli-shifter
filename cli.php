@@ -8,6 +8,7 @@ require_once( dirname( __FILE__ ) . "/lib/error.php" );
 require_once( dirname( __FILE__ ) . "/lib/functions.php" );
 require_once( dirname( __FILE__ ) . "/lib/archive.php" );
 require_once( dirname( __FILE__ ) . "/lib/project.php" );
+require_once( dirname( __FILE__ ) . "/lib/login.php" );
 
 /**
  * WP-CLI commands for the Shifter.
@@ -31,5 +32,6 @@ class WP_CLI_Shifter extends WP_CLI_Command
 }
 
 WP_CLI::add_command( 'shifter', 'WP_CLI_Shifter' );
+WP_CLI::add_command( 'shifter login', 'Shifter_CLI\Login' );
 WP_CLI::add_command( 'shifter archive', 'Shifter_CLI\Archive' );
 WP_CLI::add_command( 'shifter project', 'Shifter_CLI\Project' );

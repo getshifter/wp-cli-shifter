@@ -83,7 +83,9 @@ class Project extends WP_CLI_Command
 
 		$result = Functions::get_project_list( $args, $assoc_args );
 
-		if ( 200 === $result['info']['http_code'] ) {
+		if ( Error::is_error( $result ) ) {
+			WP_CLI::error( $result->get_message() );
+		} else {
 			// `docker_url` sometimes doesn't exist. So it can't display it.
 			WP_CLI\Utils\format_items( $format, $result['body'], array(
 				'site_id',
@@ -91,8 +93,6 @@ class Project extends WP_CLI_Command
 				'site_owner',
 				'update_time'
 			) );
-		} else {
-			WP_CLI::error( "Incorrect token." );
 		}
 	}
 
@@ -166,5 +166,51 @@ class Project extends WP_CLI_Command
 		}
 
 		WP_CLI::error( "Sorry, something went wrong. We're working on getting this fixed as soon as we can." );
+	}
+
+	/**
+	 * Create a project from your archive for the Shifter.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <site-id>
+	 * : The site-id.
+	 *
+	 * [--token=<token>]
+	 * : The access token to communinate with the Shifter API.
+	 *
+	 * [--shifter-user=<username>]
+	 * : The username for the Shifter.
+	 *
+	 * [--shifter-password=<password>]
+	 * : The password for the Shifter.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *   $ wp shifter project create --archive-id=xxxx --php-version=7.0 --project-name="hello" ...
+	 *   Success: xxxx-xxxx-xxxx-xxxx
+	 *
+	 * @subcommand status
+	 * @when before_wp_load
+	 */
+	function status( $args, $assoc_args )
+	{
+		if ( isset( $assoc_args['format'] ) ) {
+			$format = $assoc_args['format'];
+		} else {
+			$format = 'table';
+		}
+
+		if ( ! in_array( $format, array( "table", "csv", "json" ) ) ) {
+			WP_CLI::error( 'Invalid format: ' . $assoc_args['format'] );
+		}
+
+		$result = Functions::get_project( $args, $assoc_args );
+
+		if ( Error::is_error( $result ) ) {
+			WP_CLI::error( $result->get_message() );
+		} else {
+			WP_CLI::line( $result['body']['Item']['stock_state'] );
+		}
 	}
 }
