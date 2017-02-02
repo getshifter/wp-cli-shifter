@@ -158,9 +158,10 @@ class Archive extends WP_CLI_Command
 		}
 
 		if ( empty( $args[0] ) ) {
+			$archive = Functions::tempdir() . '/archive.zip';
 			WP_CLI::launch_self(
 				"shifter archive create",
-				array( Functions::tempdir() . '/archive.zip' ),
+				array( $archive ),
 				$assoc_args,
 				true,
 				true,
