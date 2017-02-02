@@ -9,9 +9,10 @@ use cli\prompt;
 
 class Functions
 {
-	const archive_api = "https://5mn2si2f0onlo063so26gk77j2.execute-api.us-east-1.amazonaws.com/production/archives";
-	const project_api = "https://5mn2si2f0onlo063so26gk77j2.execute-api.us-east-1.amazonaws.com/production/projects";
-	const container_api = "https://5mn2si2f0onlo063so26gk77j2.execute-api.us-east-1.amazonaws.com/production/containers";
+	const archive_api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/archives";
+	const project_api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/projects";
+	const container_api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/containers";
+	const login_api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/login";
 
 	public static function get_pre_signed_url( $token )
 	{
@@ -93,7 +94,7 @@ class Functions
 	public static function auth( $username, $password )
 	{
 		$result = self::post(
-			"https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/login",
+			self::login_api,
 			json_encode( array(
 				"username" => $username,
 				"password" => $password
