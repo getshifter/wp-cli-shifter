@@ -13,6 +13,7 @@ cache:
 before_script:
 - bash bin/install-wp-tests.sh wordpress_test root '' localhost latest
 - WP_CLI_BIN_DIR=/tmp/wp-cli-phar bash bin/install-package-tests.sh
-script: phpunit && WP_CLI_BIN_DIR=/tmp/wp-cli-phar ./vendor/bin/behat
+- composer install
+script: ./vendor/bin/phpunit && WP_CLI_BIN_DIR=/tmp/wp-cli-phar ./vendor/bin/behat
 env:
   secure: oI2JoNEqiB4I9gszAoI2l6An5rO5z7sDAsShIECe1vEstToV6+ZnADxxSPsl5ZMHe18n4LTKtapx8rPdbMjJcukj1psLhyFbkaxQ7CaaLlWs2B+XqVWJywU9qdHjCbwRpvGm7IuviBLQMXK89vji92Hmt1P8rZXeiwXd/WhG4zsBl+f2NuPV0VkHa0i8f86CidYbV11ilncovJZYbd+yS4vZdLSL7QpKuF85vqzN74Qmd61ol66FYj/vVkb+TGK1xdemUlXHb9QAQWMOhyPLk7aLXgFKZtpm2BIwwDMKMyPX1YHztTzGYQXySi5gxI5t+qivfjGscQR4TzL1bMgkJCaZjAa3C1QUx2n6tOEkUflD4bE++Zc0+xa0wJ2qEJNLXUPhQT6Cn1Qg2BljZ923EZ/iKJfh/0QQrW7yAjtF0Os8JMOTp13PL9yE63G/myA7OhUfWjO7Dm3EYS2BCfyNx9Fvr/eJuHuG9eJNyVamHOUIgpC2698p8jDkAqpom/vzKg5EtVQbrnhSKuzeYCu/CNz7+i6T1ij6JCFQfId94JhBuo1aobPho8RMrIBHypW+OQ4EnQYtttfmtgQjgZH4+0nmhs2y/6qu9Fmi8Au0lJVkhs0aQzOVQR25azUipMVklOnytS4k4yJvSG+fv0fESdrG5wfX2U5eokbPBQpbXQw=
