@@ -14,11 +14,15 @@ class Functions
 	const container_api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/containers";
 	const login_api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/login";
 
-	public static function get_pre_signed_url( $token )
+	public static function get_pre_signed_url( $token, $assoc_args )
 	{
+		$params = array();
+		if ( ! empty( $assoc_args['site_id'] ) ) {
+			$params['site_id'] = $assoc_args['site_id'];
+		}
 		$api = self::archive_api . "?task=integration";
 
-		$result = self::post( $api, array(), $token );
+		$result = self::post( $api, $params, $token );
 
 		if ( Error::is_error( $result ) ) {
 			return $result;

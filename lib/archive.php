@@ -135,9 +135,18 @@ class Archive extends WP_CLI_Command
 	 * [--shifter-password=<password>]
 	 * : The password for the Shifter.
 	 *
+	 * [--site_id=<token>]
+	 * : The Shifter site id.
+	 *
 	 * ## EXAMPLES
 	 *
 	 *   $ wp shifter archive upload
+	 *   Shifter Username: jack
+	 *   Password (will be hidden):
+	 *   Success: Logged in as jack
+	 *   Success: Archive ID: db81bb93-13f8-41d1-9605-4cc397e52192
+	 *
+	 *   $ wp shifter archive upload ./archive.zip --site_id=xxxx-xxxx-xxxx-xxxx
 	 *   Shifter Username: jack
 	 *   Password (will be hidden):
 	 *   Success: Logged in as jack
@@ -152,7 +161,7 @@ class Archive extends WP_CLI_Command
 			WP_CLI::error( $token->get_message() );
 		}
 
-		$signed_url = Functions::get_pre_signed_url( $token );
+		$signed_url = Functions::get_pre_signed_url( $token, $assoc_args );
 		if ( Error::is_error( $signed_url ) ) {
 			WP_CLI::error( $signed_url->get_message() );
 		}
