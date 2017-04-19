@@ -16,7 +16,7 @@ class Functions
 
 	public static function get_pre_signed_url( $token )
 	{
-		$api = self::archive_api . "?task=integration";
+		$api = self::get_archive_api_url() . "?task=integration";
 
 		$result = self::post( $api, array(), $token );
 
@@ -54,7 +54,7 @@ class Functions
 		if ( Error::is_error( $token ) ) {
 			return $token;
 		}
-		return self::get( self::project_api . '/' . $args[0], $token );
+		return self::get( self::get_project_api_url() . '/' . $args[0], $token );
 	}
 
 	public static function get_project_list( $args, $assoc_args )
@@ -63,12 +63,12 @@ class Functions
 		if ( Error::is_error( $token ) ) {
 			return $token;
 		}
-		return self::get( self::project_api, $token );
+		return self::get( self::get_project_api_url(), $token );
 	}
 
 	public static function get_archive_list( $token )
 	{
-		return self::get( self::archive_api, $token );
+		return self::get( self::get_archive_api_url(), $token );
 	}
 
 	public static function get_local_token()
@@ -94,7 +94,7 @@ class Functions
 	public static function auth( $username, $password )
 	{
 		$result = self::post(
-			self::login_api,
+			self::get_login_api_url(),
 			json_encode( array(
 				"username" => $username,
 				"password" => $password
@@ -410,6 +410,42 @@ class Functions
 			} else {
 				return new Error( "Sorry, something went wrong. We're working on getting this fixed as soon as we can." );
 			}
+		}
+	}
+
+	private static function get_archive_api_url()
+	{
+		if ( getenv( 'SHIFTER_ARCHIVE_API' ) ) {
+			return esc_url_raw( getenv( 'SHIFTER_ARCHIVE_API' ) );
+		} else {
+			return self::archive_api;
+		}
+	}
+
+	private static function get_project_api_url()
+	{
+		if ( getenv( 'SHIFTER_PROJECT_API' ) ) {
+			return esc_url_raw( getenv( 'SHIFTER_PROJECT_API' ) );
+		} else {
+			return self::project_api;
+		}
+	}
+
+	private static function get_container_api_url()
+	{
+		if ( getenv( 'SHIFTER_CONTAINER_API' ) ) {
+			return esc_url_raw( getenv( 'SHIFTER_CONTAINER_API' ) );
+		} else {
+			return self::container_api;
+		}
+	}
+
+	private static function get_login_api_url()
+	{
+		if ( getenv( 'SHIFTER_LOGIN_API' ) ) {
+			return esc_url_raw( getenv( 'SHIFTER_LOGIN_API' ) );
+		} else {
+			return self::login_api;
 		}
 	}
 }
