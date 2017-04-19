@@ -116,12 +116,11 @@ Feature: Test that `wp shifter archive` commands loads.
     When I try `wp shifter archive delete xxxx --shifter-user=xxxx --shifter-password=xxxx`
     Then STDERR should contain:
       """
-      Error: User does not exist.
+      Invalid Username or Password
       """
 
     When I try `wp shifter archive upload --shifter-user=xxxx --shifter-password=xxxx`
     Then STDERR should contain:
       """
-      Error: User does not exist.
+      Invalid Username or Password
       """
-

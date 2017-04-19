@@ -22,11 +22,11 @@ class SimpleMapTest extends WP_UnitTestCase
 	{
 		$res = Functions::auth( "foo", "bar" );
 		$this->assertTrue( Error::is_error( $res ) );
-		$this->assertSame( 'User does not exist.', $res->get_message() );
+		$this->assertSame( 'Invalid Username or Password', $res->get_message() );
 
 		$res = Functions::auth( getenv( "SHIFTER_USER" ), "bar" );
 		$this->assertTrue( Error::is_error( $res ) );
-		$this->assertSame( 'Incorrect username or password.', $res->get_message() );
+		$this->assertSame( 'Invalid Username or Password', $res->get_message() );
 
 		$res = Functions::auth( getenv( "SHIFTER_USER" ), getenv( "SHIFTER_PASS" ) );
 		$this->assertTrue( !! $res );
