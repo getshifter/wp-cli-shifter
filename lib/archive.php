@@ -156,16 +156,6 @@ class Archive extends WP_CLI_Command
 	 */
 	function upload( $args, $assoc_args )
 	{
-		$token = Functions::get_access_token( $args, $assoc_args );
-		if ( Error::is_error( $token ) ) {
-			WP_CLI::error( $token->get_message() );
-		}
-
-		$signed_url = Functions::get_pre_signed_url( $token, $assoc_args );
-		if ( Error::is_error( $signed_url ) ) {
-			WP_CLI::error( $signed_url->get_message() );
-		}
-
 		if ( empty( $args[0] ) ) {
 			$archive = Functions::tempdir() . '/archive.zip';
 			WP_CLI::launch_self(
@@ -182,6 +172,16 @@ class Archive extends WP_CLI_Command
 			if ( ! is_file( $archive ) ) {
 				WP_CLI::error( $archive . " doesn't exist." );
 			}
+		}
+
+		$token = Functions::get_access_token( $args, $assoc_args );
+		if ( Error::is_error( $token ) ) {
+			WP_CLI::error( $token->get_message() );
+		}
+
+		$signed_url = Functions::get_pre_signed_url( $token, $assoc_args );
+		if ( Error::is_error( $signed_url ) ) {
+			WP_CLI::error( $signed_url->get_message() );
 		}
 
 		$ch = curl_init();
