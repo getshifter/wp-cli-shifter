@@ -97,6 +97,25 @@ Feature: Test that `wp shifter archive` commands loads.
       Success: Archive ID:
       """
 
+  Scenario: Upload an archive associated with Project
+    Given a WP install
+
+    When I run `wp shifter archive create`
+    Then STDOUT should contain:
+      """
+      Success: Archived to
+      """
+    When I run `wp shifter archive upload archive.zip --site_id=$(wp shifter project list --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS --format=json | jq -r .[0].site_id) --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS`
+    Then STDOUT should contain:
+      """
+      Success: Archive ID:
+      """
+    When I run `wp shifter archive delete $(wp shifter archive list --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS --format=json | jq -r .[0].archive_id) --shifter-user=$SHIFTER_USER --shifter-password=$SHIFTER_PASS`
+    Then STDOUT should contain:
+      """
+      Success: 🍺 Archive deleted successfully.
+      """
+
   Scenario: List archives
     Given an empty directory
 
