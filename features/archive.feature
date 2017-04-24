@@ -141,5 +141,5 @@ Feature: Test that `wp shifter archive` commands loads.
     When I try `wp shifter archive upload --shifter-user=xxxx --shifter-password=xxxx`
     Then STDERR should contain:
       """
-      Invalid Username or Password
+      doesn't exist.
       """
