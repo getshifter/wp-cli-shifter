@@ -138,7 +138,8 @@ Feature: Test that `wp shifter archive` commands loads.
       Invalid Username or Password
       """
 
-    When I try `wp shifter archive upload --shifter-user=xxxx --shifter-password=xxxx`
+    When I run `wp shifter archive create`
+    And I try `wp shifter archive upload --shifter-user=xxxx --shifter-password=xxxx archive.zip`
     Then STDERR should contain:
       """
       Invalid Username or Password
