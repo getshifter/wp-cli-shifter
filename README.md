@@ -18,6 +18,14 @@ https://getshifter.io/
 $ wp package install shifter/cli:@stable
 ```
 
+### Fatal error: Allowed memory size exhausted
+
+Override PHP memory limits inline with the following.
+
+```bash
+$ php -d memory_limit=256M /usr/local/bin/wp package install shifter/cli:@stable
+```
+
 ## Subcommands
 
 ### Upload an archive to the Shifter.
