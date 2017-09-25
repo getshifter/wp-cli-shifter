@@ -179,6 +179,16 @@ class Archive extends WP_CLI_Command
 			WP_CLI::error( $token->get_message() );
 		}
 
+		$result = Functions::create_archive( $args, $assoc_args );
+		if ( Error::is_error( $result ) ) {
+			WP_CLI::error( $result->get_message() );
+		}
+		if ( Error::is_error( $result ) ) {
+			WP_CLI::error( $result->get_message() );
+		} elseif ( 200 === $result['info']['http_code'] ) {
+			$assoc_args['archive_id'] = $result['body']['archive_id'];
+		}
+
 		$signed_url = Functions::get_pre_signed_url( $token, $assoc_args );
 		if ( Error::is_error( $signed_url ) ) {
 			WP_CLI::error( $signed_url->get_message() );

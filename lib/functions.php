@@ -9,20 +9,16 @@ use cli\prompt;
 
 class Functions
 {
-	const archive_api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/archives";
+	const archive_api = "https://api.getshifter.io/v1/archives";
 	const project_api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/projects";
 	const container_api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/containers";
 	const login_api = "https://hz0wknz3a2.execute-api.us-east-1.amazonaws.com/production/login";
 
 	public static function get_pre_signed_url( $token, $assoc_args )
 	{
-		$params = array();
-		if ( ! empty( $assoc_args['site_id'] ) ) {
-			$params['site_id'] = $assoc_args['site_id'];
-		}
-		$api = self::archive_api . "?task=integration";
+		$api = self::archive_api . '/' . $assoc_args['archive_id'] . '/upload_url';
 
-		$result = self::post( $api, $params, $token );
+		$result = self::get( $api, $token );
 
 		if ( Error::is_error( $result ) ) {
 			return $result;
@@ -50,6 +46,23 @@ class Functions
 			}
 			return self::auth( $username, $password );
 		}
+	}
+
+	public static function create_archive( $args, $assoc_args )
+	{
+		$token = self::get_access_token( $args, $assoc_args );
+		if ( Error::is_error( $token ) ) {
+			return $token;
+		}
+		$params = array();
+		if ( ! empty( $assoc_args['site_id'] ) ) {
+			$params['site_id'] = $assoc_args['site_id'];
+		}
+		return self::post(
+			self::archive_api,
+			$params,
+			$token
+		);
 	}
 
 	public static function get_project( $args, $assoc_args )
