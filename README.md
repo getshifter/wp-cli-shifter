@@ -1,4 +1,4 @@
-# Compatibility issue with Shifter V2
+# Warning: Compatibility issue with Shifter V2
 Due to Shifter's update, this plugin doesn't work properly with Shifter V2 environment. 
 
 
