@@ -1,3 +1,7 @@
+# Compatibility issue with Shifter V2
+Due to Shifter's update, this plugin doesn't work properly with Shifter V2 environment. 
+
+
 # wp shifter
 
 [![Build Status](https://travis-ci.org/getshifter/wp-cli-shifter.svg?branch=master)](https://travis-ci.org/getshifter/wp-cli-shifter)
